@@ -1,0 +1,12 @@
+{
+  "name": "brightwave-ai-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BrightWave AI static website with TideLearn adaptive learning demo",
+  "scripts": {
+    "test": "node tests/learn-scheduler.test.js && node tests/learn-smoke.test.js && node tests/learn-rsvp.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}

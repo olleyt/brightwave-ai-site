@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TideLearn — Adaptive Exam Prep by BrightWave AI</title>
+<meta name="description" content="Adaptive learning demo: spaced repetition, speed-read review, and comprehension checks in one daily session.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ======================= TOP BAR ======================= -->
+<header class="topbar">
+  <a class="brand" href="#" data-nav="dashboard">
+    <span class="brand-mark">T</span>
+    <span class="brand-name">TideLearn</span>
+    <span class="brand-by">by BrightWave AI</span>
+  </a>
+  <nav class="topnav">
+    <button class="navlink" data-nav="dashboard">Today</button>
+    <button class="navlink" data-nav="topics">Topics</button>
+    <button class="navlink" data-nav="import">Import</button>
+  </nav>
+  <div class="topbar-right">
+    <div class="streak" id="streakBadge" title="Daily streak">
+      <span class="streak-flame">▲</span><span id="streakCount">0</span>
+    </div>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- ======================= DASHBOARD ======================= -->
+  <section class="screen" id="screen-dashboard">
+    <div class="dash-head">
+      <p class="eyebrow" id="dashDate"></p>
+      <h1 class="dash-title" id="dashGreeting">Ready for today's tide?</h1>
+    </div>
+
+    <div class="hero-card" id="sessionHero">
+      <div class="hero-card-body">
+        <p class="hero-kicker">Today's session</p>
+        <h2 class="hero-line" id="heroSummary"></h2>
+        <ul class="hero-plan" id="heroPlan"></ul>
+      </div>
+      <div class="hero-card-cta">
+        <button class="btn btn-primary btn-lg" id="startSessionBtn">Start session</button>
+        <p class="hero-est" id="heroEstimate"></p>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card"><p class="stat-num" id="statDue">0</p><p class="stat-label">cards due</p></div>
+      <div class="stat-card"><p class="stat-num" id="statRetention">–</p><p class="stat-label">retention</p></div>
+      <div class="stat-card"><p class="stat-num" id="statMastered">0/0</p><p class="stat-label">topics mastered</p></div>
+      <div class="stat-card"><p class="stat-num" id="statExamDays">–</p><p class="stat-label">days to exam</p></div>
+    </div>
+
+    <h3 class="section-title">Topic mastery</h3>
+    <div class="topic-list" id="dashTopicList"></div>
+  </section>
+
+  <!-- ======================= TOPICS ======================= -->
+  <section class="screen" id="screen-topics" hidden>
+    <div class="dash-head">
+      <p class="eyebrow">Curriculum</p>
+      <h1 class="dash-title">All topics</h1>
+    </div>
+    <div class="topic-list" id="topicsList"></div>
+  </section>
+
+  <!-- ======================= IMPORT ======================= -->
+  <section class="screen" id="screen-import" hidden>
+    <div class="dash-head">
+      <p class="eyebrow">Bring your own material</p>
+      <h1 class="dash-title">Import a lesson</h1>
+      <p class="lede">Paste text from any source — an Educative.io lesson, an article, your own notes. TideLearn turns it into a study note and flashcards, and folds it into your schedule.</p>
+    </div>
+    <div class="import-grid">
+      <div class="import-form">
+        <label class="field-label" for="importTitle">Topic title</label>
+        <input class="field" id="importTitle" type="text" placeholder="e.g. Kubernetes Networking Basics">
+        <label class="field-label" for="importText">Lesson text</label>
+        <textarea class="field field-area" id="importText" placeholder="Paste the lesson content here…"></textarea>
+        <button class="btn btn-primary" id="importBtn">Generate note &amp; cards</button>
+        <p class="import-note" id="importStatus"></p>
+      </div>
+      <aside class="import-aside">
+        <h3>Getting text out of Educative.io</h3>
+        <p>Educative doesn't offer an export API, and its terms prohibit automated scraping — so this importer works from pasted text, which keeps things clean: it's your paid content, copied by you, for your own study.</p>
+        <p>Fastest workflow: open the lesson, select all (<span class="kbd">⌘A</span>), copy (<span class="kbd">⌘C</span>), paste here. The parser strips navigation junk automatically.</p>
+        <h3>AI generation</h3>
+        <p>This demo uses a built-in heuristic generator. In production, the same pipeline calls Claude to write the key concept, mnemonic, and question set — the interface is identical.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ======================= SESSION ======================= -->
+  <section class="screen screen-session" id="screen-session" hidden>
+    <div class="session-top">
+      <button class="btn-ghost" id="exitSessionBtn">✕ Exit</button>
+      <div class="wave-progress" aria-hidden="true">
+        <svg viewBox="0 0 600 28" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="sunsetGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#FFB35C"/><stop offset="100%" stop-color="#FF6B4A"/>
+            </linearGradient>
+            <clipPath id="waveClip"><rect id="waveClipRect" x="0" y="0" width="0" height="28"/></clipPath>
+          </defs>
+          <path class="wave-track" d="M0 14 Q 25 4 50 14 T 100 14 T 150 14 T 200 14 T 250 14 T 300 14 T 350 14 T 400 14 T 450 14 T 500 14 T 550 14 T 600 14" fill="none"/>
+          <path class="wave-fill" clip-path="url(#waveClip)" d="M0 14 Q 25 4 50 14 T 100 14 T 150 14 T 200 14 T 250 14 T 300 14 T 350 14 T 400 14 T 450 14 T 500 14 T 550 14 T 600 14" fill="none"/>
+        </svg>
+        <div class="wave-phases" id="wavePhases"></div>
+      </div>
+      <div class="session-clock" id="sessionClock">0:00</div>
+    </div>
+    <div class="session-body" id="sessionBody"></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>TideLearn demo · spaced repetition (SM-2) · review-mode speed reading · comprehension-gated pacing</p>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
