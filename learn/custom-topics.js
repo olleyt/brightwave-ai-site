@@ -3,86 +3,429 @@
    {id, name, note:{keyConcept, points[], mnemonic}, cards[{front,back}], quiz[{q, opts[4], a, explain}]} */
 var CUSTOM_CURRICULUM = /* BEGIN-TOPICS */[
   {
-    "id": "custom-sagemaker-inference-options-mrpx179v",
-    "name": "SageMaker Inference Options",
+    "id": "custom-sagemaker-endpoint-types-mrpxdmu3",
+    "name": "SageMaker Endpoint Types",
     "note": {
-      "keyConcept": "SageMaker deploys trained models behind endpoints; choose real-time for low latency, serverless for spiky traffic with zero infrastructure, and asynchronous for large payloads and long processing.",
+      "keyConcept": "SageMaker offers four inference types — Real-Time, Serverless, Asynchronous, and Batch Transform — chosen by latency needs, traffic pattern, payload size, and whether scoring is online or offline.",
       "points": [
-        "Real-time inference serves interactive, low-latency workloads from a persistent endpoint.",
-        "Serverless Inference is fully managed with auto-scaling — ideal for traffic with idle periods that can tolerate cold starts.",
-        "Asynchronous inference queues requests, handling payloads up to 1 GB and processing times up to one hour.",
-        "JumpStart deploys pre-trained catalog models from the Studio UI with no code; ModelBuilder in the Python SDK gives fine-grained control; CloudFormation manages deployments at scale.",
-        "SageMaker Neo optimizes models to run efficiently on hardware like AWS Inferentia, cutting compute cost.",
-        "Autoscaling adjusts endpoint compute with incoming traffic so you pay only for resources you use."
+        "Real-Time: always-on endpoint with millisecond latency, billed per instance-hour — for interactive apps and steady traffic.",
+        "Serverless: no instance management, billed per inference (GB-seconds), but cold starts of seconds — for infrequent or spiky traffic.",
+        "Asynchronous: requests queue in SQS and responses land in S3; payloads up to 1 GB and processing can take minutes — for large documents or long-running inference.",
+        "Batch Transform runs as a job against a dataset in S3 with no persistent endpoint — for scheduled offline scoring.",
+        "Multi-Model Endpoints host thousands of models loaded on demand on one endpoint — cost-saving when many models share resource needs (one per tenant or product).",
+        "Multi-Container endpoints run several containers on one endpoint for pipeline inference (pre/post-processing) or A/B testing across frameworks."
       ],
-      "mnemonic": "RSA at the endpoint: Real-time is Rapid, Serverless is Spiky, Asynchronous is Sizeable — match the letter to your traffic."
+      "mnemonic": "Ask the traffic: Now? Sometimes? Huge? Offline? — Real-Time now, Serverless sometimes, Async huge, Batch offline."
     },
     "cards": [
       {
-        "front": "Which SageMaker inference option fits interactive, low-latency workloads?",
-        "back": "Real-time inference — a persistent endpoint serving immediate predictions."
+        "front": "Which endpoint type fits interactive apps with steady traffic and millisecond latency?",
+        "back": "Real-Time — an always-on endpoint billed per instance-hour."
       },
       {
-        "front": "When is SageMaker Serverless Inference the right choice?",
-        "back": "Workloads with idle periods between traffic spurts that can tolerate cold starts — no infrastructure to configure or manage."
+        "front": "Which inference option removes instance management and bills per inference, at the cost of cold starts?",
+        "back": "Serverless Inference — best for infrequent or spiky traffic that can tolerate cold starts of seconds."
       },
       {
-        "front": "What are the payload and processing limits of asynchronous inference?",
-        "back": "Payloads up to 1 GB and processing times up to one hour; requests are queued and processed asynchronously."
+        "front": "How does Asynchronous Inference handle requests, and what are its limits?",
+        "back": "Requests are queued in SQS and responses written to S3; payloads up to 1 GB and processing can take minutes."
       },
       {
-        "front": "Which feature deploys pre-trained catalog models from the Studio UI with no complex configuration?",
-        "back": "SageMaker JumpStart — ideal for low-code/no-code deployment."
+        "front": "Does Batch Transform require an endpoint?",
+        "back": "No — it runs as a job against a dataset in S3 with no persistent endpoint; use it for scheduled offline scoring."
       },
       {
-        "front": "What does SageMaker Neo do?",
-        "back": "Optimizes trained models to run efficiently on targets like AWS Inferentia, improving performance and reducing compute cost."
+        "front": "When do Multi-Model Endpoints save money?",
+        "back": "When you host many models with similar resource needs (e.g. one per tenant) — thousands load on demand behind one endpoint."
       }
     ],
     "quiz": [
       {
-        "q": "A model serves requests with 800 MB payloads that take 40 minutes to process. Which inference option fits?",
+        "q": "A document service receives sporadic 50-page PDF uploads; processing takes 90 seconds and clients can wait. Which endpoint type?",
         "opts": [
-          "Real-time inference",
-          "Serverless Inference",
-          "Asynchronous inference",
-          "JumpStart"
+          "Real-Time",
+          "Serverless",
+          "Asynchronous",
+          "Batch Transform"
         ],
         "a": 2,
-        "explain": "Asynchronous inference queues requests and supports payloads up to 1 GB and processing up to an hour."
+        "explain": "Async fits large payloads and long processing when clients can wait — requests queue in SQS, results land in S3."
       },
       {
-        "q": "Traffic to your endpoint is idle most of the day with occasional bursts, and cold starts are acceptable. Best option?",
+        "q": "Which statement about Batch Transform is TRUE?",
         "opts": [
-          "Real-time inference on a large instance",
-          "Serverless Inference",
-          "Asynchronous inference",
-          "Pre-computing results with Neo"
+          "It requires a persistent endpoint",
+          "It runs as a job against S3 data with no endpoint",
+          "It only supports tiny payloads",
+          "It bills per inference"
         ],
         "a": 1,
-        "explain": "Serverless Inference auto-scales fully managed infrastructure and suits spiky traffic that tolerates cold starts."
+        "explain": "Batch Transform is a job, not an endpoint — a classic exam misconception."
       },
       {
-        "q": "An experienced data scientist wants fine-grained control (instance types, network isolation) when deploying their own model in Python. Recommended feature?",
+        "q": "Traffic is steady and high with strict latency requirements. Why is Serverless the wrong choice?",
         "opts": [
-          "JumpStart in Studio",
-          "ModelBuilder in the SageMaker Python SDK",
-          "CloudFormation templates",
-          "SageMaker Neo"
+          "Serverless cannot serve ML models",
+          "Cold starts add latency and cost exceeds always-on instances at steady high traffic",
+          "Serverless requires BYOC",
+          "Serverless only supports batch data"
         ],
         "a": 1,
-        "explain": "ModelBuilder in the SageMaker Python SDK gives code-level control over deployment settings."
+        "explain": "'Serverless is always cheaper' is a misconception — at steady high traffic, always-on real-time instances win on both latency and cost."
       },
       {
-        "q": "What is the primary purpose of SageMaker Neo?",
+        "q": "You host one model per product for thousands of products with similar resource needs. Cheapest hosting option?",
         "opts": [
-          "Queueing large inference requests",
-          "Auto-scaling endpoints with traffic",
-          "Optimizing models to run efficiently on hardware like AWS Inferentia",
-          "Deploying catalog models through a UI"
+          "One Real-Time endpoint per model",
+          "A Multi-Model Endpoint",
+          "Serverless endpoint per model",
+          "Batch Transform"
+        ],
+        "a": 1,
+        "explain": "A Multi-Model Endpoint loads thousands of models on demand behind a single endpoint."
+      }
+    ]
+  },
+  {
+    "id": "custom-endpoint-auto-scaling-mrpxdmu3",
+    "name": "Endpoint Auto-Scaling",
+    "note": {
+      "keyConcept": "SageMaker endpoints scale through Application Auto Scaling on CloudWatch metrics — InvocationsPerInstance is the responsive default, and you pick target-tracking, step, or scheduled policies to match the traffic pattern.",
+      "points": [
+        "InvocationsPerInstance is the most common scaling metric — set the target to ~70% of measured capacity to leave headroom.",
+        "CPUUtilization suits CPU-bound inference but is a lagging indicator: requests can queue before CPU peaks.",
+        "ModelLatency / OverheadLatency scaling maintains a response-time SLA.",
+        "Target tracking is the simplest recommended default; step scaling gives explicit thresholds; scheduled scaling pre-scales for known spikes.",
+        "If a spike exceeds max instances × scale-out speed, requests still fail — combine scheduled scaling with reactive policies for predictable spikes.",
+        "Mitigate cold starts with provisioned concurrency (serverless) or a minimum instance count above zero (real-time)."
+      ],
+      "mnemonic": "Invocations lead, CPU lags — schedule the spikes you can see, track the ones you can't."
+    },
+    "cards": [
+      {
+        "front": "What is the most common SageMaker scaling metric, and what target is recommended?",
+        "back": "InvocationsPerInstance, targeted at roughly 70% of measured capacity to leave headroom."
+      },
+      {
+        "front": "Why is CPUUtilization a poor default scaling metric for ML inference?",
+        "back": "It lags — requests can queue before CPU peaks. InvocationsPerInstance responds faster."
+      },
+      {
+        "front": "Which scaling policy type is the simplest recommended default?",
+        "back": "Target tracking — set a target metric value and Application Auto Scaling continuously adjusts to maintain it."
+      },
+      {
+        "front": "How do you prevent cold starts on a scaled-down endpoint?",
+        "back": "Provisioned concurrency for serverless endpoints, or a minimum instance count above zero for real-time."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "An endpoint handles 100 req/s normally but spikes to 10,000 req/s during flash sales, and auto-scaling alone drops requests. What do you combine?",
+        "opts": [
+          "Two target-tracking policies on different metrics",
+          "Scheduled scaling before the sale plus reactive target tracking",
+          "Step scaling with a longer cooldown",
+          "A larger single instance"
+        ],
+        "a": 1,
+        "explain": "Predictable spikes need scheduled pre-scaling; reactive target tracking then handles the unpredictable remainder."
+      },
+      {
+        "q": "Which metric do you scale on to maintain a latency SLA?",
+        "opts": [
+          "InvocationsPerInstance",
+          "CPUUtilization",
+          "ModelLatency",
+          "MemoryUtilization"
         ],
         "a": 2,
-        "explain": "Neo compiles and optimizes models for better performance on target hardware, minimizing compute costs."
+        "explain": "ModelLatency/OverheadLatency scaling targets response time directly."
+      },
+      {
+        "q": "Traffic is unpredictable and you want the least configuration. Which approach?",
+        "opts": [
+          "Step scaling with five thresholds",
+          "Scheduled scaling",
+          "Target tracking on InvocationsPerInstance",
+          "Manual scaling"
+        ],
+        "a": 2,
+        "explain": "Target tracking on InvocationsPerInstance is the recommended low-config default for unpredictable traffic."
+      }
+    ]
+  },
+  {
+    "id": "custom-deployment-strategies-mrpxdmu3",
+    "name": "Deployment Strategies",
+    "note": {
+      "keyConcept": "Deployment strategies trade rollout speed against risk: Blue/Green switches all traffic at once with instant rollback, Canary and Linear shift gradually, and Shadow tests with zero user exposure.",
+      "points": [
+        "Blue/Green runs old (blue) and new (green) endpoints simultaneously and switches 100% of traffic at once — rollback is instant, but all users are exposed if the new model fails.",
+        "Canary routes a small percentage (e.g. 5%) to the new variant, monitors metrics, then gradually increases — it catches real-traffic issues before full rollout.",
+        "Linear increments traffic in equal steps at fixed intervals (e.g. 10% every 5 minutes) — systematic confidence building.",
+        "Shadow sends a copy of every request to the new model, but its responses are never returned to users — a zero-risk testing strategy, not a deployment strategy.",
+        "Deployment is risk management: decide how much real traffic you're willing to risk on an unproven model, and define the rollback trigger metric before you deploy."
+      ],
+      "mnemonic": "Blue-Green flips the switch, Canary sings first at 5%, Linear climbs the stairs, Shadow watches without ever speaking."
+    },
+    "cards": [
+      {
+        "front": "In Blue/Green deployment, what happens at cutover and how do you roll back?",
+        "back": "100% of traffic switches from blue (old) to green (new) at once; rollback is switching traffic back to blue instantly."
+      },
+      {
+        "front": "What distinguishes Canary from Blue/Green?",
+        "back": "Canary shifts traffic gradually (small % first, monitored, then increased); Blue/Green is all-or-nothing with fast rollback — fundamentally different risk profiles."
+      },
+      {
+        "front": "How does Linear deployment differ from Canary?",
+        "back": "Linear moves traffic in equal steps at fixed intervals; Canary starts small and grows based on monitored confidence."
+      },
+      {
+        "front": "Why is Shadow not truly a deployment strategy?",
+        "back": "The shadow model receives copies of live requests but its responses never reach users — it's a zero-risk testing strategy."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "You want to validate that a new recommendation model improves CTR before exposing any users to it. Which strategy?",
+        "opts": [
+          "Blue/Green",
+          "Canary",
+          "Linear",
+          "Shadow"
+        ],
+        "a": 3,
+        "explain": "Shadow mirrors production traffic to the new model while discarding its responses — comparison at zero user risk."
+      },
+      {
+        "q": "You need zero downtime and instant rollback if CTR drops after release. Which setup?",
+        "opts": [
+          "Canary with manual review",
+          "Blue/Green with a CloudWatch alarm on CTR as the rollback trigger",
+          "Shadow deployment",
+          "Linear over 24 hours"
+        ],
+        "a": 1,
+        "explain": "Blue/Green gives instant full cutover and instant rollback; the alarm on the business metric triggers the switch back."
+      },
+      {
+        "q": "Routing 5% of traffic to the new variant and increasing it as metrics hold is called:",
+        "opts": [
+          "Blue/Green",
+          "Canary",
+          "Shadow",
+          "All-at-once"
+        ],
+        "a": 1,
+        "explain": "That's the canary pattern — a small exposed slice catches issues before full rollout."
+      }
+    ]
+  },
+  {
+    "id": "custom-sagemaker-containers-ecr-mrpxdmu3",
+    "name": "SageMaker Containers & ECR",
+    "note": {
+      "keyConcept": "All SageMaker training and inference runs in Docker containers — use pre-built images with Script Mode, extend a base image, or bring your own container implementing /invocations and /ping, stored in ECR.",
+      "points": [
+        "Pre-built containers cover TensorFlow, PyTorch, sklearn, XGBoost, MXNet; Script Mode runs your own training script inside them — the simplest approach.",
+        "Extended containers start from a SageMaker base image and add dependencies via Dockerfile, inheriting SageMaker's built-in integration.",
+        "BYOC must implement SageMaker's API contract: POST /invocations returning predictions and GET /ping returning 200 for health checks.",
+        "Images are stored in Amazon ECR; training and inference jobs reference the ECR image URI.",
+        "ECR lifecycle policies automatically delete old images to control storage costs.",
+        "BYOC does not require rewriting training code — existing code can be packaged in a container that meets the contract."
+      ],
+      "mnemonic": "Script it, extend it, or bring it — but whatever you bring must answer /ping with a 200 heartbeat."
+    },
+    "cards": [
+      {
+        "front": "You need standard PyTorch plus your own training script. What's the simplest option?",
+        "back": "Script Mode — your script runs inside the AWS-managed pre-built container."
+      },
+      {
+        "front": "What two HTTP endpoints must a BYOC inference container implement?",
+        "back": "POST /invocations (returns predictions) and GET /ping (returns 200 as the health check)."
+      },
+      {
+        "front": "When do you choose an extended container over Script Mode?",
+        "back": "When you need extra libraries beyond the managed image but still want to inherit SageMaker's built-in integration."
+      },
+      {
+        "front": "Where are SageMaker container images stored, and how are they referenced?",
+        "back": "In Amazon ECR — jobs reference the image's ECR URI. Lifecycle policies clean up old versions."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "You must deploy a model using a proprietary C++ inference engine as a real-time endpoint. What does the container need, and where does it live?",
+        "opts": [
+          "Just a Python handler, stored in S3",
+          "POST /invocations + GET /ping implemented, image pushed to ECR",
+          "A Lambda wrapper in ECR",
+          "Nothing special — DockerHub works directly"
+        ],
+        "a": 1,
+        "explain": "BYOC must meet SageMaker's API contract (/invocations, /ping) and be pushed to ECR, referenced by URI."
+      },
+      {
+        "q": "Your training needs a custom CUDA library unavailable in any AWS image. Which option?",
+        "opts": [
+          "Script Mode",
+          "A pre-built container as-is",
+          "BYOC or an extended container",
+          "Batch Transform"
+        ],
+        "a": 2,
+        "explain": "Custom system-level dependencies require extending a base image or bringing your own container."
+      },
+      {
+        "q": "Which statement is TRUE?",
+        "opts": [
+          "BYOC requires rewriting training code with the SageMaker SDK",
+          "Script Mode and BYOC are the same thing",
+          "BYOC can package existing code as long as the container meets SageMaker's API contract",
+          "Only Python containers are allowed"
+        ],
+        "a": 2,
+        "explain": "The contract is about HTTP endpoints, not language or framework — existing code ports without rewrites."
+      }
+    ]
+  },
+  {
+    "id": "custom-codepipeline-vs-sagemaker-pipelines-mrpxdmu3",
+    "name": "CodePipeline vs SageMaker Pipelines",
+    "note": {
+      "keyConcept": "CodePipeline orchestrates general CI/CD (source → build → test → deploy) while SageMaker Pipelines orchestrates ML workflows (process → train → evaluate → register); full MLOps uses both, gated by the Model Registry.",
+      "points": [
+        "CodePipeline triggers on code commits and wires CodeCommit/GitHub → CodeBuild → CodeDeploy.",
+        "SageMaker Pipelines has ML-native step types (ProcessingStep, TrainingStep, ModelStep), caching of intermediate results, and lineage tracking.",
+        "SageMaker Pipelines triggers on data events, schedules, or invocation from CodePipeline — they are complementary, not interchangeable.",
+        "The Model Registry catalogs model versions with metrics, metadata, and approval status (Pending/Approved/Rejected) — deployment is gated on Approved.",
+        "Full architecture: CodePipeline → SageMaker Pipelines → registered model → CodeDeploy with canary or blue/green; EventBridge routes Model Monitor drift alerts back to trigger retraining.",
+        "The Registry is the governance layer, not just storage — approval gates keep bad models out of production."
+      ],
+      "mnemonic": "Code ships code, SageMaker ships models — and the Registry is the bouncer checking approvals at the door."
+    },
+    "cards": [
+      {
+        "front": "What does SageMaker Pipelines provide that CodePipeline lacks?",
+        "back": "ML-specific steps (Processing/Training/Model), caching of intermediate results, experiment lineage tracking."
+      },
+      {
+        "front": "What is the SageMaker Model Registry?",
+        "back": "A central catalog of model versions with metrics, metadata, and approval status (Pending/Approved/Rejected) that gates deployment."
+      },
+      {
+        "front": "How do CodePipeline and SageMaker Pipelines combine in a full MLOps architecture?",
+        "back": "CodePipeline triggers SageMaker Pipelines to run the ML workflow, then deploys the registered model via CodeDeploy using canary or blue/green."
+      },
+      {
+        "front": "What connects Model Monitor drift alerts back to retraining?",
+        "back": "EventBridge rules route the drift alarm to trigger the retraining pipeline."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "A model retrains nightly but must deploy only if validation AUC > 0.85. What enforces this gate?",
+        "opts": [
+          "CodeBuild unit tests",
+          "Model Registry approval set automatically by the pipeline's evaluation step when AUC exceeds the threshold",
+          "A manual checklist in Confluence",
+          "CloudTrail logging"
+        ],
+        "a": 1,
+        "explain": "The evaluation step records metrics and a condition step marks the version Approved only above the threshold; deployment is gated on Approved status."
+      },
+      {
+        "q": "Which statement is TRUE?",
+        "opts": [
+          "CodePipeline can replace SageMaker Pipelines",
+          "SageMaker Pipelines manages source control",
+          "They are complementary — general CI/CD vs ML workflow orchestration",
+          "Model Registry stores training datasets"
+        ],
+        "a": 2,
+        "explain": "CodePipeline lacks ML primitives; SageMaker Pipelines lacks general CI/CD stages — you use both."
+      },
+      {
+        "q": "What can trigger a SageMaker Pipeline run?",
+        "opts": [
+          "Only code commits",
+          "Data events, schedules, or a call from CodePipeline",
+          "Only manual console runs",
+          "Only GitHub Actions"
+        ],
+        "a": 1,
+        "explain": "ML workflows respond to data reality — S3 events and schedules — as well as upstream CI/CD."
+      }
+    ]
+  },
+  {
+    "id": "custom-automated-retraining-triggers-mrpxdmu3",
+    "name": "Automated Retraining Triggers",
+    "note": {
+      "keyConcept": "EventBridge is the glue that closes the MLOps loop: retraining fires on a schedule, on new data landing in S3, or — most sophisticated — on drift detected by Model Monitor.",
+      "points": [
+        "Schedule-based: an EventBridge cron rule invokes the pipeline daily/weekly — simple, but blind to what the data is actually doing.",
+        "Data-based: new data lands in S3 → S3 event → EventBridge rule → pipeline, so the model trains on fresh data as it arrives.",
+        "Drift-based: Model Monitor detects data/concept drift → CloudWatch alarm → EventBridge rule → retraining pipeline — the model self-heals when the world changes.",
+        "Step Functions is a general-purpose workflow orchestrator: use it when the flow spans services beyond ML (Lambda steps, human review); use SageMaker Pipelines for pure ML workflows with experiment tracking.",
+        "Schedule-only retraining misses rapid distribution shifts and wastes compute when data hasn't changed — drift-based triggering is more efficient and responsive."
+      ],
+      "mnemonic": "Clock, Cargo, Alarm: retrain on time, on arrival, or on drift — the best pipelines listen for the alarm."
+    },
+    "cards": [
+      {
+        "front": "Name the three automated retraining trigger patterns.",
+        "back": "Schedule-based (EventBridge cron), data-based (S3 event → EventBridge), and drift-based (Model Monitor → CloudWatch alarm → EventBridge)."
+      },
+      {
+        "front": "Trace the drift-based retraining chain end to end.",
+        "back": "Model Monitor detects drift → CloudWatch alarm fires → EventBridge rule matches → SageMaker Pipeline retrains the model."
+      },
+      {
+        "front": "When do you pick Step Functions over SageMaker Pipelines?",
+        "back": "When the workflow spans multiple AWS services beyond ML — e.g. notification → human review → training → deployment with Lambda steps."
+      },
+      {
+        "front": "Why is scheduled retraining alone insufficient?",
+        "back": "It can miss rapid distribution shifts and wastes compute when the data hasn't meaningfully changed."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "A fraud model must retrain automatically within 24 hours of drift being detected, with no human intervention. Which architecture?",
+        "opts": [
+          "CloudTrail → SNS → Lambda",
+          "Model Monitor → CloudWatch alarm → EventBridge → SageMaker Pipeline",
+          "S3 → Glue → Athena",
+          "A nightly CodePipeline cron"
+        ],
+        "a": 1,
+        "explain": "Drift-based triggering: Monitor detects, the alarm fires, EventBridge routes it, the pipeline retrains — fully automatic."
+      },
+      {
+        "q": "New labeled data lands in S3 hourly and you want the model always trained on fresh data. Which trigger pattern?",
+        "opts": [
+          "Schedule-based",
+          "Data-based via S3 events → EventBridge",
+          "Drift-based",
+          "Manual retraining"
+        ],
+        "a": 1,
+        "explain": "S3 event notifications through EventBridge start the pipeline exactly when new data arrives."
+      },
+      {
+        "q": "Which statement about Step Functions vs SageMaker Pipelines is TRUE?",
+        "opts": [
+          "Step Functions has native ML experiment tracking",
+          "SageMaker Pipelines is the general-purpose orchestrator",
+          "Step Functions suits multi-service workflows; SageMaker Pipelines suits pure ML workflows",
+          "They are the same service renamed"
+        ],
+        "a": 2,
+        "explain": "Step Functions orchestrates arbitrary AWS services via state machines; SageMaker Pipelines adds ML-native steps, caching, and lineage."
       }
     ]
   }
