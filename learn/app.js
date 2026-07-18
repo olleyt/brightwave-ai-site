@@ -75,13 +75,26 @@ function allTopics() {
   return byId;
 }
 function migrateImportedTopics() {
-  [...customCurriculum(), ...(state.customTopics || [])].forEach(t => {
+  const sources = [...customCurriculum(), ...(state.customTopics || [])];
+  sources.forEach(t => {
     if (!state.topics[t.id]) state.topics[t.id] = { id: t.id, name: t.name, introduced: false, mastery: 0, custom: true };
     t.cards.forEach((c, ci) => {
       const id = t.id + "#" + ci;
       if (!state.cards[id]) state.cards[id] = { id, topicId: t.id, ef: 2.5, reps: 0, interval: 0, due: null, lapses: 0 };
     });
   });
+  // Prune custom topics (and their cards) that were removed or renamed in the curriculum,
+  // so saved state doesn't leave orphaned rows behind. Built-in topics are never pruned.
+  const validCustom = new Set(sources.map(t => t.id));
+  let pruned = false;
+  Object.keys(state.topics).forEach(id => {
+    if (state.topics[id].custom && !validCustom.has(id)) {
+      delete state.topics[id];
+      Object.keys(state.cards).forEach(cid => { if (state.cards[cid].topicId === id) delete state.cards[cid]; });
+      pruned = true;
+    }
+  });
+  if (pruned) persist();
 }
 
 /* ============================================================
