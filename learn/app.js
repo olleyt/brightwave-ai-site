@@ -62,14 +62,20 @@ function seedState() {
 
 function persist() { store.set("tidelearn-state", state); }
 
+/* Topics generated locally by tools/import-doc.mjs and committed in custom-topics.js */
+function customCurriculum() {
+  return typeof CUSTOM_CURRICULUM !== "undefined" ? CUSTOM_CURRICULUM : [];
+}
+
 function allTopics() {
   const byId = {};
   CURRICULUM.forEach(t => byId[t.id] = t);
+  customCurriculum().forEach(t => byId[t.id] = t);
   (state.customTopics || []).forEach(t => byId[t.id] = t);
   return byId;
 }
 function migrateImportedTopics() {
-  (state.customTopics || []).forEach(t => {
+  [...customCurriculum(), ...(state.customTopics || [])].forEach(t => {
     if (!state.topics[t.id]) state.topics[t.id] = { id: t.id, name: t.name, introduced: false, mastery: 0, custom: true };
     t.cards.forEach((c, ci) => {
       const id = t.id + "#" + ci;

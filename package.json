@@ -4,9 +4,11 @@
   "private": true,
   "description": "BrightWave AI static website with TideLearn adaptive learning demo",
   "scripts": {
-    "test": "node tests/learn-scheduler.test.js && node tests/learn-smoke.test.js && node tests/learn-rsvp.test.js"
+    "test": "node tests/learn-scheduler.test.js && node tests/learn-smoke.test.js && node tests/learn-rsvp.test.js",
+    "import-doc": "node tools/import-doc.mjs"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "jsdom": "^26.1.0"
   }
 }

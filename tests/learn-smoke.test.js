@@ -27,7 +27,8 @@ const ok = (cond, msg) => { if (!cond) { fails++; console.log("FAIL:", msg); } e
   ok($$("#heroPlan li").length >= 3, "session plan shows recall/read/learn/check steps");
   const dueBefore = Number($("#statDue").textContent);
   ok(dueBefore >= 10, `due cards seeded (${dueBefore})`);
-  ok($$("#dashTopicList .topic-row").length === 6, "6 topics listed");
+  const expectedTopics = 6 + (window.CUSTOM_CURRICULUM || []).length;
+  ok($$("#dashTopicList .topic-row").length === expectedTopics, `${expectedTopics} topics listed (6 built-in + custom curriculum)`);
   ok($$("#dashTopicList [data-tune]").length === 2, "2 topics expose Tune mode");
   const streakBefore = Number($("#streakCount").textContent);
 

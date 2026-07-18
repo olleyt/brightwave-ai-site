@@ -94,6 +94,8 @@
         <p>Fastest workflow: open the lesson, select all (<span class="kbd">⌘A</span>), copy (<span class="kbd">⌘C</span>), paste here. The parser strips navigation junk automatically.</p>
         <h3>AI generation</h3>
         <p>This demo uses a built-in heuristic generator. In production, the same pipeline calls Claude to write the key concept, mnemonic, and question set — the interface is identical.</p>
+        <h3>Have a doc URL?</h3>
+        <p>Run <span class="kbd">npm run import-doc -- &lt;url&gt;</span> locally — it fetches the page, generates a full topic (cards + quiz) with Claude, and commits it into the site's curriculum.</p>
       </aside>
     </div>
   </section>
@@ -126,6 +128,7 @@
   <p>TideLearn demo · spaced repetition (SM-2) · review-mode speed reading · comprehension-gated pacing</p>
 </footer>
 
+<script src="custom-topics.js"></script>
 <script src="data.js"></script>
 <script src="app.js"></script>
 </body>
