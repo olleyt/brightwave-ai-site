@@ -428,5 +428,441 @@ var CUSTOM_CURRICULUM = /* BEGIN-TOPICS */[
         "explain": "Step Functions orchestrates arbitrary AWS services via state machines; SageMaker Pipelines adds ML-native steps, caching, and lineage."
       }
     ]
+  },
+  {
+    "id": "custom-amazon-sagemaker-ai-mrpxy9wt",
+    "name": "Amazon SageMaker AI",
+    "note": {
+      "keyConcept": "Amazon SageMaker AI is a fully managed service for building, training, and deploying machine learning models at scale, offering built-in algorithms, custom container support, and one-click deployment.",
+      "points": [
+        "Pipe mode streams data directly from S3 for faster training but requires protobuf RecordIO format, while File mode downloads data to the instance volume first and is used for incremental training.",
+        "SageMaker offers two inference deployment methods: Hosting Services (persistent HTTPS endpoint for real-time, sub-second predictions) and Batch Transform (no persistent endpoint, for inferring an entire dataset).",
+        "Managed Spot Training can save up to 90% on training costs by using spare compute capacity.",
+        "Pricing: training is billed per instance-hour, inference per endpoint-hour, plus separate data storage and transfer charges, with no upfront fees.",
+        "CloudWatch monitors SageMaker instance and training metrics, while CloudTrail detects unauthorized SageMaker API calls.",
+        "SageMaker Neo optimizes models for edge devices to run faster without accuracy loss, and JumpStart provides pre-trained foundation models for quick deployment."
+      ],
+      "mnemonic": "'Pipe RecordIO Runs Faster' - remember Pipe mode needs protobuf RecordIO and beats File mode on speed."
+    },
+    "cards": [
+      {
+        "front": "What data format must you use to take advantage of SageMaker Pipe mode?",
+        "back": "Protobuf RecordIO."
+      },
+      {
+        "front": "Difference between SageMaker Hosting Services and Batch Transform?",
+        "back": "Hosting Services provides a persistent HTTPS endpoint for real-time, sub-second predictions; Batch Transform needs no persistent endpoint and infers an entire dataset."
+      },
+      {
+        "front": "How much can Managed Spot Training save on training costs?",
+        "back": "Up to 90% by using spare compute capacity."
+      },
+      {
+        "front": "What does SageMaker Neo do?",
+        "back": "Optimizes ML models for deployment on edge devices to run faster with no loss in accuracy."
+      },
+      {
+        "front": "Which AWS services monitor SageMaker metrics and detect unauthorized API calls?",
+        "back": "CloudWatch monitors instance/training metrics; CloudTrail detects unauthorized SageMaker API calls."
+      },
+      {
+        "front": "What is SageMaker Automatic Model Tuning?",
+        "back": "It finds the best model version by automating training jobs within specified hyperparameter ranges."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "Which training input mode requires protobuf RecordIO format and provides faster startup and higher I/O throughput?",
+        "opts": [
+          "File mode",
+          "Pipe mode",
+          "Batch mode",
+          "Stream mode"
+        ],
+        "a": 1,
+        "explain": "Pipe mode streams data directly from S3, is faster than File mode, and requires protobuf RecordIO format."
+      },
+      {
+        "q": "Which deployment method is best for getting inferences for an entire dataset without a persistent endpoint?",
+        "opts": [
+          "Hosting Services",
+          "Batch Transform",
+          "Local Mode",
+          "Model Registry"
+        ],
+        "a": 1,
+        "explain": "Batch Transform needs no persistent endpoint and is designed for inferring an entire dataset."
+      },
+      {
+        "q": "How is SageMaker inference typically billed?",
+        "opts": [
+          "Per instance-hour",
+          "Per endpoint-hour",
+          "Per prediction request",
+          "Flat monthly fee"
+        ],
+        "a": 1,
+        "explain": "Inference is billed per endpoint-hour, while training is billed per instance-hour."
+      },
+      {
+        "q": "Which SageMaker feature provides pre-trained foundation models for tasks like text summarization and image generation?",
+        "opts": [
+          "SageMaker Neo",
+          "SageMaker JumpStart",
+          "SageMaker Data Wrangler",
+          "SageMaker Ground Truth"
+        ],
+        "a": 1,
+        "explain": "JumpStart provides pre-trained foundation models and ready-to-use solutions for common ML tasks."
+      }
+    ]
+  },
+  {
+    "id": "custom-vpc-isolation-for-ml-mrq7szxt",
+    "name": "VPC Isolation for ML",
+    "note": {
+      "keyConcept": "For sensitive workloads, run SageMaker inside your own VPC: private subnets, VPC endpoints (PrivateLink) instead of internet, security groups, and network isolation mode for a container that can make no outbound calls at all.",
+      "points": [
+        "Training/inference instances go in private subnets with no internet gateway; outbound internet only via NAT Gateway if truly needed.",
+        "VPC endpoints (PrivateLink) let SageMaker reach S3, ECR, the SageMaker API, CloudWatch, and KMS without traffic leaving the AWS network — required when internet access is disabled.",
+        "Security groups are stateful firewalls scoped to the instances: no inbound for training, outbound only to the S3/ECR endpoints.",
+        "EnableNetworkIsolation=True blocks ALL outbound calls from the training container — dependencies must be pre-packaged or arrive via S3 input channels.",
+        "Inter-node encryption (TLS) protects distributed-training traffic — ~10–15% overhead, required for regulated workloads.",
+        "A VPC is a network boundary, not a complete security solution — you still need security groups, VPC endpoint policies, and IAM."
+      ],
+      "mnemonic": "Lock the room (private subnet), install service hatches (VPC endpoints), post a guard (security group), and for top secrecy cut the phone line entirely (network isolation)."
+    },
+    "cards": [
+      {
+        "front": "How does SageMaker reach S3 and ECR when internet access is disabled?",
+        "back": "Through VPC endpoints (PrivateLink) — traffic to S3, ECR, SageMaker API, CloudWatch, and KMS never leaves the AWS network."
+      },
+      {
+        "front": "What does EnableNetworkIsolation=True do to a training job?",
+        "back": "The container can make no outbound network calls at all — no package downloads, no exfiltration. Dependencies must be pre-packaged or provided via S3 input channels."
+      },
+      {
+        "front": "What is inter-node encryption and what does it cost?",
+        "back": "TLS encryption of traffic between distributed-training instances — about 10–15% overhead, required for regulated workloads."
+      },
+      {
+        "front": "Is a private-subnet endpoint automatically secure?",
+        "back": "No — VPC is only a network boundary. You still need security groups, VPC endpoint policies, and IAM to control access."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "A financial firm requires training jobs with no internet access, all data on the AWS network, and auditable API calls. Which set of configurations applies?",
+        "opts": [
+          "Public subnet + HTTPS + CloudWatch",
+          "Private subnets, VPC endpoints, security groups, and EnableNetworkIsolation",
+          "NAT Gateway with an allowlist",
+          "S3 bucket policies alone"
+        ],
+        "a": 1,
+        "explain": "Private subnets remove the internet path, VPC endpoints keep AWS-service traffic internal, security groups scope the instances, and network isolation blocks any outbound call from the container."
+      },
+      {
+        "q": "Which statement about VPC deployment for SageMaker endpoints is TRUE?",
+        "opts": [
+          "It makes endpoints publicly accessible",
+          "The endpoint becomes reachable only from within that VPC — for internal ML APIs",
+          "It removes the need for IAM",
+          "It disables CloudWatch"
+        ],
+        "a": 1,
+        "explain": "A VPC-deployed endpoint is not exposed to the public internet — ideal for internal-only ML services."
+      },
+      {
+        "q": "A training job in network isolation mode fails trying to pip-install a package. Why?",
+        "opts": [
+          "The security group is misconfigured",
+          "Network isolation blocks all outbound calls — dependencies must be pre-packaged in the container",
+          "S3 permissions are missing",
+          "The NAT Gateway is down"
+        ],
+        "a": 1,
+        "explain": "With EnableNetworkIsolation=True the container cannot reach anything — bake dependencies into the image or deliver them via S3 input channels."
+      }
+    ]
+  },
+  {
+    "id": "custom-iam-for-ml-workloads-mrq7szxt",
+    "name": "IAM for ML Workloads",
+    "note": {
+      "keyConcept": "IAM for ML operates at three layers — human access via SSO roles, tightly-scoped per-job service execution roles, and resource-based policies — with Role Manager templates, condition keys, permission boundaries, and SCPs enforcing least privilege.",
+      "points": [
+        "Humans assume roles via IAM Identity Center (SSO) — never long-lived access keys; data scientists read Feature Store/S3 without deploy rights, ML engineers get SageMaker/ECR without IAM admin.",
+        "Every SageMaker job assumes an execution role scoped to exactly what it needs: one S3 input prefix, one output prefix, one ECR image — nothing else.",
+        "Resource-based policies complete the picture: S3 bucket policies grant to specific role ARNs, KMS key policies name who can decrypt, ECR repo policies control image pulls.",
+        "SageMaker Role Manager provides pre-built permission templates for common ML personas, reducing misconfiguration risk.",
+        "Enforce least privilege with IAM condition keys (s3:prefix, aws:RequestedRegion), permission boundaries capping maximum grants, and SCPs as org-wide guardrails.",
+        "SCPs only restrict — they can never grant permissions that identity policies don't already allow."
+      ],
+      "mnemonic": "Three locks on the lab: who you are (SSO role), what the job may touch (execution role), and what the resource admits (bucket/key policy) — and the SCP is the building code, not a key."
+    },
+    "cards": [
+      {
+        "front": "Why is one shared IAM role for all SageMaker jobs dangerous?",
+        "back": "A compromised training job could access all data and models. Each job's execution role should be scoped to its exact S3 prefixes and ECR image."
+      },
+      {
+        "front": "What is SageMaker Role Manager?",
+        "back": "A console tool with pre-built IAM permission templates for ML personas (data scientist, MLOps engineer, deployment) — reduces misconfiguration risk."
+      },
+      {
+        "front": "Can an SCP grant a permission?",
+        "back": "No — SCPs only restrict. They cap what identity policies may allow but never add permissions."
+      },
+      {
+        "front": "What are the minimum S3 permissions for a training job reading s3://ml-data/training/ and writing to s3://ml-models/output/?",
+        "back": "s3:GetObject on ml-data/training/*, s3:PutObject on ml-models/output/*, plus s3:ListBucket on each bucket restricted by an s3:prefix condition."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "How should ML practitioners get AWS access?",
+        "opts": [
+          "Long-lived access keys per person",
+          "A shared admin account",
+          "Assuming roles via IAM Identity Center (SSO)",
+          "Root credentials with MFA"
+        ],
+        "a": 2,
+        "explain": "Humans assume short-lived roles through SSO; long-lived keys are an anti-pattern."
+      },
+      {
+        "q": "Which combination enforces least privilege on a training job's data access?",
+        "opts": [
+          "A broad s3:* policy plus CloudTrail",
+          "Prefix-scoped execution role + bucket policy naming that role ARN + condition keys",
+          "One org-wide role",
+          "KMS grants alone"
+        ],
+        "a": 1,
+        "explain": "Scope the execution role to exact prefixes, mirror it in the bucket policy, and tighten with condition keys like s3:prefix."
+      },
+      {
+        "q": "A team wants to guarantee no account in the org can ever call sagemaker:DeleteModel. What do they use?",
+        "opts": [
+          "An IAM permission boundary",
+          "A Service Control Policy in AWS Organizations",
+          "A bucket policy",
+          "SageMaker Role Manager"
+        ],
+        "a": 1,
+        "explain": "SCPs are org-level guardrails that restrict every account and role beneath them."
+      }
+    ]
+  },
+  {
+    "id": "custom-sagemaker-model-monitor-mrq7szxt",
+    "name": "SageMaker Model Monitor",
+    "note": {
+      "keyConcept": "Model Monitor is statistical process control for your model: scheduled jobs capture sampled inference traffic and compare it to a baseline with four built-in monitors — data quality, model quality, bias drift, and feature-attribution drift.",
+      "points": [
+        "Data Quality Monitor compares live feature distributions to the training baseline (KS test for continuous, chi-squared for categorical features).",
+        "Model Quality Monitor compares predictions to ground truth — it requires a label-ingestion pipeline that merges labels in after the fact.",
+        "Bias Drift Monitor uses Clarify to recompute fairness metrics on live traffic; Feature Attribution Drift uses Clarify SHAP values to detect when different features start driving predictions.",
+        "Setup flow: baseline job → monitor schedule on the endpoint → sampled capture to S3 → scheduled comparison → violations to S3/CloudWatch → alarm → EventBridge → retraining.",
+        "You configure a sampling rate — capturing 100% of traffic is expensive and unnecessary for statistical validity.",
+        "Monitoring is data science on your model's behavior: drift without accuracy loss still matters — it's an early warning that the world is shifting, and retraining only fixes concept drift, not pipeline failures."
+      ],
+      "mnemonic": "Four guards at the door: Data checks the inputs, Quality checks the answers, Bias checks the fairness, Attribution checks the reasons."
+    },
+    "cards": [
+      {
+        "front": "What are the four built-in Model Monitor types?",
+        "back": "Data Quality, Model Quality, Bias Drift (via Clarify), and Feature Attribution Drift (via Clarify SHAP)."
+      },
+      {
+        "front": "What statistical tests does the Data Quality Monitor use?",
+        "back": "KS test for continuous features and chi-squared for categorical — comparing live distributions to the training baseline."
+      },
+      {
+        "front": "What extra pipeline does the Model Quality Monitor require?",
+        "back": "Ground-truth label ingestion — labels arrive after the fact and a merge job joins them to captured predictions."
+      },
+      {
+        "front": "Walk the Model Monitor setup flow.",
+        "back": "Create a baseline from training data → schedule the monitor on the endpoint → capture sampled traffic to S3 → scheduled job compares to baseline → violations logged → CloudWatch alarm → EventBridge → retraining."
+      },
+      {
+        "front": "Input distributions shifted but holdout accuracy is unchanged. Does it matter?",
+        "back": "Yes — data drift without accuracy loss is an early warning of a shifting world; investigate the source, tighten monitoring, and be ready to retrain before accuracy follows."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "You want to detect your loan model becoming biased against a protected group in production. Which monitor, and what does it use?",
+        "opts": [
+          "Data Quality Monitor using KS tests",
+          "Bias Drift Monitor using Clarify fairness metrics against the training baseline",
+          "Model Quality Monitor using labels",
+          "CloudWatch CPU alarms"
+        ],
+        "a": 1,
+        "explain": "The Bias Drift Monitor recomputes Clarify fairness metrics on live traffic and compares them to the baseline."
+      },
+      {
+        "q": "Which statement about traffic capture is TRUE?",
+        "opts": [
+          "Model Monitor requires 100% capture",
+          "You configure a sampling rate — full capture is unnecessary for statistical validity",
+          "Capture happens only during training",
+          "Captured data stays on the instance"
+        ],
+        "a": 1,
+        "explain": "Sampled capture to S3 is sufficient for the statistical comparisons and far cheaper."
+      },
+      {
+        "q": "Why can't the Model Quality Monitor work immediately at deployment?",
+        "opts": [
+          "It needs a GPU",
+          "Ground-truth labels arrive later — a merge pipeline must join them to predictions first",
+          "Baselines expire",
+          "It only supports batch endpoints"
+        ],
+        "a": 1,
+        "explain": "Prediction quality is only measurable once real outcomes are known and merged back."
+      }
+    ]
+  },
+  {
+    "id": "custom-ml-cost-optimization-mrq7szxt",
+    "name": "ML Cost Optimization",
+    "note": {
+      "keyConcept": "Optimize training and inference separately: Managed Spot Training with checkpointing cuts training cost up to 90%, while Savings Plans, Inferentia chips, Multi-Model Endpoints, and Inference Recommender rightsizing attack inference cost.",
+      "points": [
+        "Managed Spot Training saves up to 90% — jobs get interrupted when AWS reclaims capacity, so checkpoint model state to S3 every N steps and resume from the last checkpoint.",
+        "SageMaker Savings Plans (1–3 year commitment, up to 64%) apply flexibly across usage types; Reserved Instances (up to 72%) lock to a specific instance type.",
+        "Inf1/Inf2 (AWS Inferentia) chips cut inference cost up to 70% vs GPU for large deep-learning models.",
+        "Multi-Model Endpoints consolidate many models on shared infrastructure; serverless inference pays only per invocation for infrequent traffic.",
+        "SageMaker Inference Recommender load-tests across instance types and reports latency/cost trade-offs; Compute Optimizer recommends rightsizing from usage.",
+        "Fewer, larger instances can beat many small ones for distributed training because of communication overhead."
+      ],
+      "mnemonic": "Spot the savings, checkpoint the risk: train on Spot with saves every N steps, serve on the smallest chip that meets the SLA."
+    },
+    "cards": [
+      {
+        "front": "How much can Managed Spot Training save, and what's the catch?",
+        "back": "Up to 90% — but jobs can be interrupted when AWS reclaims the instance, so you must checkpoint to S3 and resume from the last checkpoint."
+      },
+      {
+        "front": "Savings Plans vs Reserved Instances — the key difference?",
+        "back": "Savings Plans (up to 64%) apply flexibly across SageMaker usage types; Reserved Instances (up to 72%) are locked to a specific instance type."
+      },
+      {
+        "front": "What are Inf1/Inf2 instances?",
+        "back": "AWS Inferentia purpose-built inference chips — up to 70% cost reduction vs GPU for large deep-learning models."
+      },
+      {
+        "front": "How does Inference Recommender remove rightsizing guesswork?",
+        "back": "It runs load tests across instance types and reports the latency/cost trade-off for each."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "A 20-hour training job costs $500 on On-Demand GPUs with no checkpoints. What two changes cut cost up to 90%, and what must you now handle?",
+        "opts": [
+          "Switch to CPU and reduce epochs",
+          "Enable Managed Spot Training and add S3 checkpointing; handle interruptions by resuming from checkpoints",
+          "Buy Reserved Instances",
+          "Move to Lambda"
+        ],
+        "a": 1,
+        "explain": "Spot pricing gives the savings; checkpointing makes the new interruption failure mode recoverable."
+      },
+      {
+        "q": "Steady-state endpoint, willing to commit for 3 years, wants flexibility across instance types. Which pricing lever?",
+        "opts": [
+          "Reserved Instances",
+          "SageMaker Savings Plans",
+          "Spot Instances",
+          "On-Demand"
+        ],
+        "a": 1,
+        "explain": "Savings Plans trade commitment for discounts while staying flexible across usage types — RIs lock the instance type."
+      },
+      {
+        "q": "Which pair best cuts inference cost for a large DL model with steady traffic?",
+        "opts": [
+          "Serverless + CSV input",
+          "Inferentia (Inf2) instances + Savings Plan",
+          "Batch Transform + Spot",
+          "More CPUs"
+        ],
+        "a": 1,
+        "explain": "Purpose-built inference silicon plus a commitment discount attacks both the hardware and the rate."
+      }
+    ]
+  },
+  {
+    "id": "custom-ml-observability-stack-mrq7szxt",
+    "name": "ML Observability Stack",
+    "note": {
+      "keyConcept": "Four tools answer four different questions: CloudWatch Metrics — what is happening now; Logs Insights — why did it fail; X-Ray — where in the call chain is the latency; CloudTrail — who did what and when.",
+      "points": [
+        "CloudWatch Metrics capture endpoint signals (ModelLatency, OverheadLatency, 4XX/5XX errors, InvocationsPerInstance, CPU) and drive alarms for scaling and alerting.",
+        "CloudWatch Logs + Logs Insights hold container stdout/stderr and let you query millions of log events with SQL-like syntax for error patterns.",
+        "X-Ray does distributed tracing across API Gateway, Lambda, and SageMaker — its service map and trace timeline pinpoint which component added latency.",
+        "CloudTrail records every AWS API call (CreateEndpoint, DeleteModel, PutObject) as an immutable audit log — compliance and forensics, and it can trigger EventBridge rules.",
+        "CloudTrail is an API audit log, not a performance monitor; X-Ray is not Lambda-only — it instruments any SDK-supporting service."
+      ],
+      "mnemonic": "Now, Why, Where, Who: Metrics see now, Logs explain why, X-Ray finds where, CloudTrail names who."
+    },
+    "cards": [
+      {
+        "front": "Which tool answers 'what is happening on my endpoint right now'?",
+        "back": "CloudWatch Metrics — ModelLatency, error counts, InvocationsPerInstance — with alarms for scaling and alerting."
+      },
+      {
+        "front": "Which tool finds which component in an API Gateway → Lambda → SageMaker chain adds latency?",
+        "back": "AWS X-Ray — distributed tracing with a service map and per-request trace timeline."
+      },
+      {
+        "front": "Which tool tells you who deleted a model and when?",
+        "back": "CloudTrail — the immutable audit log of every AWS API call."
+      },
+      {
+        "front": "How do you search millions of log events for a specific error string?",
+        "back": "CloudWatch Logs Insights — SQL-like queries over container stdout/stderr."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "Users report intermittent 10-second delays; endpoint metrics look normal; the path is API Gateway → Lambda → SageMaker. Which service pinpoints the culprit?",
+        "opts": [
+          "CloudTrail",
+          "X-Ray, generating a service map and trace timeline",
+          "Logs Insights",
+          "Compute Optimizer"
+        ],
+        "a": 1,
+        "explain": "Distributed tracing shows per-component latency across the whole request path."
+      },
+      {
+        "q": "Which statement about CloudTrail is TRUE?",
+        "opts": [
+          "It monitors CPU and memory",
+          "It records API calls as an immutable audit log and can trigger EventBridge rules",
+          "It replaces CloudWatch alarms",
+          "It only logs console actions"
+        ],
+        "a": 1,
+        "explain": "CloudTrail is the who-did-what-when layer — audit and forensics, not performance."
+      },
+      {
+        "q": "A training container crashed with a stack trace. Where do you look first?",
+        "opts": [
+          "X-Ray traces",
+          "CloudTrail events",
+          "CloudWatch Logs (container stdout/stderr) via Logs Insights",
+          "S3 access logs"
+        ],
+        "a": 2,
+        "explain": "Container output lands in CloudWatch Logs; Logs Insights queries it for the error pattern."
+      }
+    ]
   }
 ]/* END-TOPICS */;
