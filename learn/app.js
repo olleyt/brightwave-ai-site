@@ -232,16 +232,25 @@ function renderTopics(el, verbose) {
     const statusText = !t.introduced ? "not started" : t.mastery >= 0.85 ? "mastered" : "learning";
     const cardCount = Object.values(state.cards).filter(c => c.topicId === t.id).length;
     const row = document.createElement("div");
-    row.className = "topic-row";
+    row.className = "topic-row topic-row-clickable";
+    row.setAttribute("role", "button");
+    row.setAttribute("tabindex", "0");
+    row.setAttribute("aria-label", `Practice ${t.name}`);
     row.innerHTML = `
       <span class="topic-status ${status}" title="${statusText}"></span>
       <span class="topic-name">${t.name}${t.custom ? ' <span class="topic-meta">(imported)</span>' : ""}</span>
       ${src && src.tune ? `<button class="tune-chip" data-tune="${t.id}">♪ Tune</button>` : ""}
       <span class="topic-meta">${cardCount} cards${verbose ? " · " + statusText : ""}</span>
-      <div class="mastery-bar"><div class="mastery-fill" style="width:${Math.round(t.mastery * 100)}%"></div></div>`;
+      <div class="mastery-bar"><div class="mastery-fill" style="width:${Math.round(t.mastery * 100)}%"></div></div>
+      <span class="topic-practice-hint" aria-hidden="true">Practice →</span>`;
+    row.addEventListener("click", () => startTopicSession(t.id));
+    row.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.code === "Space") { e.preventDefault(); startTopicSession(t.id); }
+    });
     el.appendChild(row);
   });
-  $$("[data-tune]", el).forEach(b => b.addEventListener("click", () => openTune(b.dataset.tune)));
+  // Tune chip is a control inside a clickable row — don't let its click start a session
+  $$("[data-tune]", el).forEach(b => b.addEventListener("click", (e) => { e.stopPropagation(); openTune(b.dataset.tune); }));
 }
 
 /* ============================================================
@@ -266,6 +275,30 @@ function startSession() {
     graded: [],        // {cardId, grade}
     quizResults: []    // {topicId, correct}
   };
+  nav("session");
+  renderWave();
+  startClock();
+  nextPhase();
+}
+
+/* Focused practice for a single topic (clicked from a topic row):
+   read its note, drill all its cards, then take its quiz. Reuses the phase engine. */
+function startTopicSession(tid) {
+  const src = allTopics()[tid];
+  if (!src) return;
+  const cardIds = Object.values(state.cards).filter(c => c.topicId === tid).map(c => c.id);
+  const quiz = (src.quiz || []).map((q, qi) => ({ topicId: tid, qi }));
+  const plan = {
+    recall: [], readTopics: [tid], learn: cardIds, quiz,
+    estMinutes: Math.max(2, Math.round(2 + cardIds.length * 0.35 + quiz.length * 0.5)),
+    focus: tid
+  };
+  const phases = [];
+  if (plan.readTopics.length) phases.push("Read");
+  if (plan.learn.length) phases.push("Learn");
+  if (plan.quiz.length) phases.push("Check");
+  phases.push("Done");
+  session = { plan, phases, phaseIdx: -1, startedAt: Date.now(), graded: [], quizResults: [], focus: tid };
   nav("session");
   renderWave();
   startClock();
@@ -305,7 +338,7 @@ function nextPhase() {
   const phase = session.phases[session.phaseIdx];
   if (phase === "Recall") return runCards(session.plan.recall, "Recall", "Retrieve before you re-read — the struggle is the workout.");
   if (phase === "Read")   return runReader();
-  if (phase === "Learn")  return runCards(session.plan.learn, "Learn", "First pass on today's new cards. Flip, then be honest.");
+  if (phase === "Learn")  return runCards(session.plan.learn, "Learn", session.focus ? "Every card in this topic — flip, then grade honestly." : "First pass on today's new cards. Flip, then be honest.");
   if (phase === "Check")  return runQuiz();
   return runResults();
 }

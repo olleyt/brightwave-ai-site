@@ -147,6 +147,14 @@ button { font: inherit; cursor: pointer; }
 .topic-status.strong { background: var(--kelp); }
 .topic-name { font-weight: 600; flex: 1; }
 .topic-meta { font-size: 12.5px; color: var(--mist); font-family: var(--font-mono); }
+.topic-row-clickable { cursor: pointer; transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+.topic-row-clickable:hover { border-color: var(--ocean); box-shadow: 0 4px 14px rgba(0,0,0,.06); transform: translateY(-1px); }
+.topic-practice-hint {
+  font-size: 12px; font-weight: 600; color: var(--ocean); flex-shrink: 0;
+  opacity: 0; transition: opacity .15s ease; white-space: nowrap;
+}
+.topic-row-clickable:hover .topic-practice-hint,
+.topic-row-clickable:focus-visible .topic-practice-hint { opacity: 1; }
 .mastery-bar { width: 130px; height: 6px; background: var(--foam); border-radius: 3px; overflow: hidden; }
 .mastery-fill { height: 100%; background: var(--grad-sunset); border-radius: 3px; transition: width .4s ease; }
 .tune-chip {

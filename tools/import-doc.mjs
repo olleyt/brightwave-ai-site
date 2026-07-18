@@ -154,6 +154,17 @@ function appendTopic(topic) {
   fs.writeFileSync(topicsFile, updated);
 }
 
+/* Bump the ?v= cache-busting query on the learn assets so the new topic
+   shows up without a hard refresh on already-visited devices. */
+function bumpCacheVersion() {
+  const indexFile = path.join(here, "..", "learn", "index.html");
+  let html = fs.readFileSync(indexFile, "utf8");
+  const current = Number(html.match(/\?v=(\d+)/)?.[1] || 1);
+  html = html.replace(/\?v=\d+/g, `?v=${current + 1}`);
+  fs.writeFileSync(indexFile, html);
+  return current + 1;
+}
+
 /* ---------- main ---------- */
 
 const res = await fetch(url, { headers: { "User-Agent": "TideLearn-importer" } });
@@ -182,6 +193,8 @@ const topic = {
   quiz: generated.quiz,
 };
 appendTopic(topic);
+const v = bumpCacheVersion();
 
 console.log(`\nAdded "${topic.name}" — ${topic.cards.length} cards, ${topic.quiz.length} quiz questions.`);
+console.log(`Bumped asset cache version to v=${v}.`);
 console.log(`Review learn/custom-topics.js, then commit and push to publish it to your sites.`);
