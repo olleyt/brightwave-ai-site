@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "description": "BrightWave AI static website with TideLearn adaptive learning demo",
+  "license": "CC-BY-NC-SA-4.0",
+  "author": "Olga Timofeeva",
   "scripts": {
     "test": "node tests/learn-scheduler.test.js && node tests/learn-smoke.test.js && node tests/learn-rsvp.test.js",
     "import-doc": "node tools/import-doc.mjs",
