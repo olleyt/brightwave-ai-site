@@ -25,6 +25,8 @@ You turn a single source (local file, URL, or Notion page) into one or more Tide
 
    Match this shape exactly — it's what `tools/lib/topic.mjs`'s `TOPIC_SCHEMA` and `validateTopic` enforce. `id` is optional in the JSON you write (the script assigns/repairs it); set `name` to the topic's title.
 
+   If the source is an identifiable external document (a URL, a named whitepaper, a Notion page), add a `source` field on the topic — a short human-readable citation, e.g. `"source": "AWS 'Logical Separation' whitepaper — https://..."`. It's not part of the validated schema, just a plain passthrough string that rides along in the topic object; costs nothing and keeps a paper trail back to where the facts came from, which matters since these cards paraphrase third-party material.
+
 3. **Hand off the mechanical part — don't hand-edit `learn/custom-topics.js` yourself.** Write your drafted topic(s) — a single object or a JSON array if the source became multiple topics — to a scratch temp file, then run:
    ```
    node tools/import-doc.mjs --apply <tempfile>

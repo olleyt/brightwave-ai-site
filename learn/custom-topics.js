@@ -2335,6 +2335,7 @@ var CUSTOM_CURRICULUM = /* BEGIN-TOPICS */[
   },
   {
     "name": "AWS Unified Authentication & Authorization (IAM)",
+    "source": "AWS 'Logical Separation' whitepaper — https://docs.aws.amazon.com/pdfs/whitepapers/latest/logical-separation/logical-separation.pdf",
     "note": {
       "keyConcept": "AWS IAM provides a single, granular authentication and authorization model across all AWS services, letting customers enforce least privilege with policy-as-code.",
       "points": [
@@ -2408,6 +2409,7 @@ var CUSTOM_CURRICULUM = /* BEGIN-TOPICS */[
   },
   {
     "name": "AWS Monitoring & Logging (CloudTrail, Config, GuardDuty)",
+    "source": "AWS 'Logical Separation' whitepaper — https://docs.aws.amazon.com/pdfs/whitepapers/latest/logical-separation/logical-separation.pdf",
     "note": {
       "keyConcept": "AWS provides deeply integrated monitoring and logging services — CloudTrail, CloudWatch, Config, VPC Flow Logs, and GuardDuty — for tamper-evident visibility across all API calls and resource state.",
       "points": [
@@ -2496,6 +2498,7 @@ var CUSTOM_CURRICULUM = /* BEGIN-TOPICS */[
   },
   {
     "name": "AWS VPC Network Isolation",
+    "source": "AWS 'Logical Separation' whitepaper — https://docs.aws.amazon.com/pdfs/whitepapers/latest/logical-separation/logical-separation.pdf",
     "note": {
       "keyConcept": "Amazon VPC is a software-defined network that logically isolates customer resources, authorizing every packet flow against a rule and neutralizing classic network attacks like ARP spoofing.",
       "points": [
@@ -2584,6 +2587,7 @@ var CUSTOM_CURRICULUM = /* BEGIN-TOPICS */[
   },
   {
     "name": "AWS Encryption: KMS, CloudHSM & ACM",
+    "source": "AWS 'Logical Separation' whitepaper — https://docs.aws.amazon.com/pdfs/whitepapers/latest/logical-separation/logical-separation.pdf",
     "note": {
       "keyConcept": "AWS encrypts data at rest and in transit using FIPS-validated HSMs in KMS (or dedicated CloudHSM) for keys and ACM for certificate lifecycle, isolating access to keys from access to data.",
       "points": [
@@ -2672,6 +2676,7 @@ var CUSTOM_CURRICULUM = /* BEGIN-TOPICS */[
   },
   {
     "name": "AWS Host & Instance Isolation (Nitro System)",
+    "source": "AWS 'Logical Separation' whitepaper — https://docs.aws.amazon.com/pdfs/whitepapers/latest/logical-separation/logical-separation.pdf",
     "note": {
       "keyConcept": "The AWS Nitro System uses purpose-built PCIe cards, a Nitro Security Chip, and a lightweight KVM hypervisor to isolate hosts and instances, with dedicated-tenancy options for physical isolation.",
       "points": [
@@ -2760,6 +2765,7 @@ var CUSTOM_CURRICULUM = /* BEGIN-TOPICS */[
   },
   {
     "name": "AWS Serverless & Container Isolation (Firecracker)",
+    "source": "AWS 'Logical Separation' whitepaper — https://docs.aws.amazon.com/pdfs/whitepapers/latest/logical-separation/logical-separation.pdf",
     "note": {
       "keyConcept": "AWS isolates serverless functions and containers in layers built on Nitro bare metal and the open-source Firecracker micro-VM monitor, giving Lambda and Fargate strong per-account sandboxing.",
       "points": [
@@ -2844,6 +2850,7 @@ var CUSTOM_CURRICULUM = /* BEGIN-TOPICS */[
   },
   {
     "name": "AWS Data Obfuscation & Compliance Separation (FedRAMP/DoD)",
+    "source": "AWS 'Logical Separation' whitepaper — https://docs.aws.amazon.com/pdfs/whitepapers/latest/logical-separation/logical-separation.pdf",
     "note": {
       "keyConcept": "AWS has no visibility into customer content and offers techniques (encryption, tokenization, decomposition, deception) to render data unintelligible, satisfying compliance regimes like FedRAMP and the DoD SRG.",
       "points": [
