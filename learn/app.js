@@ -46,8 +46,8 @@ function seedState() {
     t.cards.forEach((c, ci) => {
       const id = t.id + "#" + ci;
       cards[id] = introduced
-        ? { id, topicId: t.id, ef: 2.5, reps: 1 + (ci % 2), interval: 1 + (ci % 3), due: daysFromNow(-(ci % 2)), lapses: 0 }
-        : { id, topicId: t.id, ef: 2.5, reps: 0, interval: 0, due: null, lapses: 0 };
+        ? { id, topicId: t.id, ef: 2.5, reps: 1 + (ci % 2), interval: 1 + (ci % 3), due: daysFromNow(-(ci % 2)), lapses: 0, excluded: false }
+        : { id, topicId: t.id, ef: 2.5, reps: 0, interval: 0, due: null, lapses: 0, excluded: false };
     });
   });
   return {
@@ -80,7 +80,7 @@ function migrateImportedTopics() {
     if (!state.topics[t.id]) state.topics[t.id] = { id: t.id, name: t.name, introduced: false, mastery: 0, custom: true };
     t.cards.forEach((c, ci) => {
       const id = t.id + "#" + ci;
-      if (!state.cards[id]) state.cards[id] = { id, topicId: t.id, ef: 2.5, reps: 0, interval: 0, due: null, lapses: 0 };
+      if (!state.cards[id]) state.cards[id] = { id, topicId: t.id, ef: 2.5, reps: 0, interval: 0, due: null, lapses: 0, excluded: false };
     });
   });
   // Prune custom topics (and their cards) that were removed or renamed in the curriculum,
@@ -133,7 +133,7 @@ const Scheduler = {
   },
   dueCards() {
     const t = todayStr();
-    return Object.values(state.cards).filter(c => c.due && c.due <= t);
+    return Object.values(state.cards).filter(c => c.due && c.due <= t && !c.excluded);
   }
 };
 
@@ -148,7 +148,7 @@ function nav(name) {
   screens.forEach(s => { $("#screen-" + s).hidden = s !== name; });
   $$(".navlink").forEach(b => b.classList.toggle("active", b.dataset.nav === name));
   if (name === "dashboard") renderDashboard();
-  if (name === "topics") renderTopics($("#topicsList"), true);
+  if (name === "topics") { renderTopics($("#topicsList"), true); renderHiddenCards(); }
   window.scrollTo(0, 0);
 }
 $$("[data-nav]").forEach(el => el.addEventListener("click", (e) => { e.preventDefault(); nav(el.dataset.nav); }));
@@ -183,7 +183,7 @@ function buildSessionPlan() {
   const learnCards = [];
   readTopics.forEach(tid => {
     Object.values(state.cards)
-      .filter(c => c.topicId === tid && c.reps === 0)
+      .filter(c => c.topicId === tid && c.reps === 0 && !c.excluded)
       .slice(0, 5)
       .forEach(c => learnCards.push(c.id));
   });
@@ -243,7 +243,7 @@ function renderTopics(el, verbose) {
     const src = topicsById[t.id];
     const status = !t.introduced ? "new" : t.mastery >= 0.85 ? "strong" : "learning";
     const statusText = !t.introduced ? "not started" : t.mastery >= 0.85 ? "mastered" : "learning";
-    const cardCount = Object.values(state.cards).filter(c => c.topicId === t.id).length;
+    const cardCount = Object.values(state.cards).filter(c => c.topicId === t.id && !c.excluded).length;
     const row = document.createElement("div");
     row.className = "topic-row topic-row-clickable";
     row.setAttribute("role", "button");
@@ -264,6 +264,37 @@ function renderTopics(el, verbose) {
   });
   // Tune chip is a control inside a clickable row — don't let its click start a session
   $$("[data-tune]", el).forEach(b => b.addEventListener("click", (e) => { e.stopPropagation(); openTune(b.dataset.tune); }));
+}
+
+/* Local-only: lists cards marked excluded (via the flashcard's "hide" control)
+   with a way to bring them back. This never reads or writes anything beyond
+   this browser's own storage — see CLAUDE.md on why that boundary matters. */
+function renderHiddenCards() {
+  const section = $("#hiddenCardsSection");
+  const el = $("#hiddenCardsList");
+  const topicsById = allTopics();
+  const hidden = Object.values(state.cards).filter(c => c.excluded);
+  section.hidden = !hidden.length;
+  if (!hidden.length) return;
+  el.innerHTML = "";
+  hidden.forEach(c => {
+    const src = topicsById[c.topicId];
+    if (!src) return; // topic no longer exists — nothing sensible to restore into
+    const srcCard = src.cards[Number(c.id.split("#")[1])];
+    const row = document.createElement("div");
+    row.className = "topic-row";
+    row.innerHTML = `
+      <span class="topic-name">${srcCard ? srcCard.front : "(card no longer exists)"}</span>
+      <span class="topic-meta">${src.name}</span>
+      <button class="btn btn-secondary" data-restore="${c.id}">Restore</button>`;
+    el.appendChild(row);
+  });
+  $$("[data-restore]", el).forEach(b => b.addEventListener("click", () => {
+    state.cards[b.dataset.restore].excluded = false;
+    persist();
+    renderHiddenCards();
+    renderTopics($("#topicsList"), true);
+  }));
 }
 
 /* ============================================================
@@ -299,7 +330,7 @@ function startSession() {
 function startTopicSession(tid) {
   const src = allTopics()[tid];
   if (!src) return;
-  const cardIds = Object.values(state.cards).filter(c => c.topicId === tid).map(c => c.id);
+  const cardIds = Object.values(state.cards).filter(c => c.topicId === tid && !c.excluded).map(c => c.id);
   const quiz = (src.quiz || []).map((q, qi) => ({ topicId: tid, qi }));
   const plan = {
     recall: [], readTopics: [tid], learn: cardIds, quiz,
@@ -395,18 +426,21 @@ function runCards(cardIds, phaseName, blurb) {
               <span class="g-key">${g.hotkey}</span>
             </button>`).join("")}
         </div>
+        <button class="btn-ghost hide-card-btn" id="hideCardBtn" style="visibility:hidden">Not relevant — hide this card</button>
       </div>`;
 
     const fc = $("#flashcard");
     fc.addEventListener("click", flip);
     fc.focus();
     $$("#gradeRow [data-grade]").forEach(b => b.addEventListener("click", () => grade(b.dataset.grade)));
+    $("#hideCardBtn").addEventListener("click", hideCard);
 
     function flip() {
       if (flipped) return;
       flipped = true;
       fc.classList.add("flipped");
       $("#gradeRow").style.visibility = "visible";
+      $("#hideCardBtn").style.visibility = "visible";
     }
     function grade(g) {
       if (!flipped) return;
@@ -415,6 +449,17 @@ function runCards(cardIds, phaseName, blurb) {
       persist();
       queue.shift();
       if (g === "again") queue.splice(Math.min(3, queue.length), 0, card.id); // relearn shortly
+      showCard();
+    }
+    /* Local-only: marks the card excluded in this browser's storage so it stops
+       appearing in study queues. Never touches the shared topic/card content —
+       there's no server write path for this at all (see CLAUDE.md). Reversible
+       from the Topics screen's "Hidden cards" list. */
+    function hideCard() {
+      if (!flipped) return;
+      card.excluded = true;
+      persist();
+      queue.shift();
       showCard();
     }
     session.keyHandler = (e) => {
@@ -570,7 +615,7 @@ function runReader() {
       // mark topic introduced once read
       state.topics[tid].introduced = true;
       // schedule its unseen cards for grading (they enter Learn phase / future sessions)
-      Object.values(state.cards).filter(c => c.topicId === tid && !c.due).forEach(c => c.due = todayStr());
+      Object.values(state.cards).filter(c => c.topicId === tid && !c.due && !c.excluded).forEach(c => c.due = todayStr());
       persist();
     };
     RSVP.start(src, mountEls, finish);

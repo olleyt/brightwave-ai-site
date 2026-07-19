@@ -231,6 +231,7 @@ button { font: inherit; cursor: pointer; }
 .card-face-back .card-hint { color: #7E9AAD; }
 
 .grade-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+.hide-card-btn { display: block; margin: 10px auto 0; font-size: 12.5px; }
 .grade-btn {
   border: 1px solid var(--line); background: #fff; border-radius: 12px;
   padding: 12px 6px; display: flex; flex-direction: column; gap: 3px; align-items: center;
