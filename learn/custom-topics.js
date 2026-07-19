@@ -2332,5 +2332,602 @@ var CUSTOM_CURRICULUM = /* BEGIN-TOPICS */[
         "explain": "SCPs are org-level guardrails that restrict every account and role beneath them."
       }
     ]
+  },
+  {
+    "name": "AWS Unified Authentication & Authorization (IAM)",
+    "note": {
+      "keyConcept": "AWS IAM provides a single, granular authentication and authorization model across all AWS services, letting customers enforce least privilege with policy-as-code.",
+      "points": [
+        "IAM lets customers authenticate to any AWS service using the same credential format, and supports console passwords, federation via external identity providers, and optional MFA.",
+        "Access control is policy-based and can be built with role-based access control (RBAC), attribute-based access control (ABAC), or both.",
+        "Policies use conditions to scope access; e.g. allow an S3 read only if the user also has the KMS decryption key and the request comes over a specific VPC.",
+        "IAM policies can be enforced across multiple accounts using AWS Organizations.",
+        "Policies are both human- and machine-readable, so they can be treated as code, built in a pipeline, and test-automated.",
+        "IAM Access Analyzer uses automated reasoning (logic and mathematical inference) to evaluate thousands of policies in seconds and flag resources accessible from outside the account."
+      ],
+      "mnemonic": "IAM = one key that opens every AWS door, and Access Analyzer is the mathematician who proves which doors are unlocked to outsiders."
+    },
+    "cards": [
+      {
+        "front": "What single mechanism lets customers authenticate to any AWS service using the same credential format?",
+        "back": "AWS Identity and Access Management (IAM)."
+      },
+      {
+        "front": "What two access-control models can IAM policies implement to build isolation?",
+        "back": "Role-based access control (RBAC) and attribute-based access control (ABAC) — either or both."
+      },
+      {
+        "front": "Which service enforces IAM policies across multiple AWS accounts?",
+        "back": "AWS Organizations."
+      },
+      {
+        "front": "What technique does IAM Access Analyzer use, and what does it detect?",
+        "back": "Automated reasoning (logic and mathematical inference); it detects resources that can be accessed from outside the customer's AWS account."
+      },
+      {
+        "front": "Give an example of scoping S3 access with a policy condition from the whitepaper.",
+        "back": "Allow access to an S3 bucket's contents only if the user also has the KMS decryption key and the request is made over a specific VPC."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "What technology does IAM Access Analyzer use to evaluate policies?",
+        "opts": [
+          "Automated reasoning (logic and mathematical inference)",
+          "Machine-learning anomaly detection",
+          "Deep packet inspection",
+          "Static linking"
+        ],
+        "a": 0,
+        "explain": "IAM Access Analyzer applies automated reasoning to evaluate thousands of policies in seconds."
+      },
+      {
+        "q": "Which service is used to enforce IAM policies across multiple AWS accounts?",
+        "opts": [
+          "AWS Organizations",
+          "AWS Config",
+          "Amazon EventBridge",
+          "AWS Transit Gateway"
+        ],
+        "a": 0,
+        "explain": "Policies can be enforced across multiple accounts using AWS Organizations."
+      },
+      {
+        "q": "Which pair of access-control approaches can IAM policies implement?",
+        "opts": [
+          "RBAC and ABAC",
+          "DAC and MAC",
+          "TLS and IPsec",
+          "NAT and ARP"
+        ],
+        "a": 0,
+        "explain": "AWS supports role-based (RBAC) and attribute-based (ABAC) access control, or both together."
+      }
+    ],
+    "id": "custom-aws-unified-authentication-authorization-mrr2fsb2"
+  },
+  {
+    "name": "AWS Monitoring & Logging (CloudTrail, Config, GuardDuty)",
+    "note": {
+      "keyConcept": "AWS provides deeply integrated monitoring and logging services — CloudTrail, CloudWatch, Config, VPC Flow Logs, and GuardDuty — for tamper-evident visibility across all API calls and resource state.",
+      "points": [
+        "AWS CloudTrail logs AWS API requests; each event records the caller identity, the called API, the source IP address, and when the call occurred.",
+        "CloudTrail logs are digitally signed to prevent tampering, encrypted, and stored in Amazon S3; S3 Object Lock can make them undeletable, and KMS customer keys can protect them.",
+        "Amazon CloudWatch monitors resources in near real-time with encrypted data; Amazon EventBridge streams system events that can trigger alarms and automated responses.",
+        "AWS Config provides a resource inventory, configuration history, and change notifications across regions and accounts, while CloudFormation detects drift from a StackSet's declared state.",
+        "A VPC Flow Log can be created for an entire VPC, a subnet, or a single network interface, and Traffic Mirroring provides full packet capture when needed.",
+        "Amazon GuardDuty analyzes VPC Flow Logs, CloudTrail logs, internal AWS DNS logs, and threat-intelligence feeds using machine learning and behavioral anomaly analysis."
+      ],
+      "mnemonic": "Trail signs and locks the receipts, Config keeps the family album, Flow Logs watch the doors, and GuardDuty is the ML bloodhound sniffing all of it."
+    },
+    "cards": [
+      {
+        "front": "How are CloudTrail logs protected from tampering, and where are they stored?",
+        "back": "They are digitally signed to prevent tampering and stored (encrypted) in Amazon S3, optionally with S3 Object Lock to prevent deletion."
+      },
+      {
+        "front": "What four details does each CloudTrail log event capture?",
+        "back": "The caller identity, the called AWS API, the source IP address of the call, and when the call occurred."
+      },
+      {
+        "front": "At what three scopes can a VPC Flow Log be created?",
+        "back": "For an entire VPC, a single subnet, or a single network interface (ENI)."
+      },
+      {
+        "front": "Which VPC feature provides full packet capture, versus routine flow logging?",
+        "back": "Traffic Mirroring provides full packet capture; VPC Flow Logs handle routine network logging."
+      },
+      {
+        "front": "What data sources and techniques does Amazon GuardDuty use?",
+        "back": "It consumes VPC Flow Logs, CloudTrail logs, internal AWS DNS logs, and threat-intelligence feeds, applying machine learning and behavioral anomaly analysis."
+      },
+      {
+        "front": "What CloudFormation capability detects unmanaged changes from the declared template?",
+        "back": "Drift detection (comparing current resource configuration against the declared StackSet configuration)."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "Which service uses machine learning on Flow Logs, CloudTrail logs, and DNS logs to detect threats?",
+        "opts": [
+          "Amazon GuardDuty",
+          "AWS Config",
+          "AWS CloudTrail",
+          "Amazon CloudFront"
+        ],
+        "a": 0,
+        "explain": "GuardDuty is the AWS-managed threat detection service that analyzes those data sources with ML."
+      },
+      {
+        "q": "Which service provides a resource inventory and configuration history across regions and accounts?",
+        "opts": [
+          "AWS Config",
+          "Amazon CloudWatch",
+          "Amazon EventBridge",
+          "Amazon CloudFront"
+        ],
+        "a": 0,
+        "explain": "AWS Config gives a continuous, detailed view of resource configuration, history, and change notifications."
+      },
+      {
+        "q": "At what scopes can a VPC Flow Log be created?",
+        "opts": [
+          "An entire VPC, a subnet, or a single network interface",
+          "A region, an AZ, or an instance",
+          "An account, an org, or a service",
+          "Only an entire VPC"
+        ],
+        "a": 0,
+        "explain": "Flow Logs can target a whole VPC, a subnet, or a single network interface."
+      },
+      {
+        "q": "How does AWS make CloudTrail logs tamper-evident before S3 storage?",
+        "opts": [
+          "They are digitally signed",
+          "They are wrapped in TLS",
+          "They are tokenized",
+          "They use ARP authentication"
+        ],
+        "a": 0,
+        "explain": "CloudTrail logs are digitally signed to prevent tampering before being stored in S3."
+      }
+    ],
+    "id": "custom-aws-monitoring-logging-cloudtrail-config-mrr2fsb2"
+  },
+  {
+    "name": "AWS VPC Network Isolation",
+    "note": {
+      "keyConcept": "Amazon VPC is a software-defined network that logically isolates customer resources, authorizing every packet flow against a rule and neutralizing classic network attacks like ARP spoofing.",
+      "points": [
+        "In a VPC the customer controls IP addresses, subnets, network ACLs, security groups, route tables, VPNs, and internet gateways.",
+        "Every packet flow is individually authorized against a rule validating correct source and destination; a packet with no matching rule is dropped, as is one with an invalid reply address.",
+        "ARP packets never hit the network (they trigger an authenticated database lookup), making ARP spoofing highly improbable, and promiscuous mode reveals nothing beyond the customer's own OS traffic.",
+        "Private-subnet instances reach the Internet without exposing their private IP by routing through a NAT gateway in a public subnet.",
+        "Connectivity options include IPsec hardware VPN to a corporate data center, AWS Direct Connect for private links, VPC peering across accounts, AWS Transit Gateway as a central hub, and AWS PrivateLink for private connections that never traverse the public Internet.",
+        "All traffic within a VPC and inter-region peering is transparently encrypted when using supported EC2 instance types, and links between data centers use physical-layer encryption."
+      ],
+      "mnemonic": "In the VPC every packet needs a passport stamped by both sender and receiver — no rule, no entry; ARP never even walks the street, so spoofers have nothing to fake."
+    },
+    "cards": [
+      {
+        "front": "Why is ARP spoofing highly improbable inside an AWS VPC?",
+        "back": "ARP packets never hit the network — they trigger an authenticated database lookup rather than being used for topology discovery."
+      },
+      {
+        "front": "What happens to a VPC packet routed to a destination with no matching rule?",
+        "back": "It is dropped; every flow is individually authorized against source/destination rules, and invalid reply addresses are also dropped."
+      },
+      {
+        "front": "What does promiscuous mode reveal on the AWS VPC network?",
+        "back": "Nothing beyond traffic bound to and from the customer's own operating system."
+      },
+      {
+        "front": "Which VPC connectivity option is a single central gateway to many VPCs and on-prem systems with IAM-managed access?",
+        "back": "AWS Transit Gateway."
+      },
+      {
+        "front": "Which VPC feature creates private connections to resources that do NOT traverse the public Internet?",
+        "back": "AWS PrivateLink."
+      },
+      {
+        "front": "How do private-subnet instances reach the Internet without exposing their private IP?",
+        "back": "By routing traffic through a NAT gateway located in a public subnet."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "Why is ARP spoofing highly improbable on the AWS VPC network?",
+        "opts": [
+          "ARP packets never hit the network; they trigger an authenticated database lookup",
+          "ARP is encrypted with TLS",
+          "ARP is blocked by network ACLs",
+          "ARP requires MFA"
+        ],
+        "a": 0,
+        "explain": "ARP packets are unnecessary for virtual topology discovery, so they never reach the network."
+      },
+      {
+        "q": "Which service acts as a single central gateway linking many VPCs and on-premises systems?",
+        "opts": [
+          "AWS Transit Gateway",
+          "NAT gateway",
+          "Internet gateway",
+          "AWS PrivateLink"
+        ],
+        "a": 0,
+        "explain": "Transit Gateway is the unified central hub for connecting many VPCs and on-prem networks, managed with IAM."
+      },
+      {
+        "q": "What does AWS do with a VPC packet that has no matching route rule?",
+        "opts": [
+          "Drops it",
+          "Queues it",
+          "Mirrors it",
+          "Encrypts it"
+        ],
+        "a": 0,
+        "explain": "Every packet flow is authorized against a rule; unmatched packets are dropped."
+      },
+      {
+        "q": "Which feature provides private connectivity to resources without crossing the public Internet?",
+        "opts": [
+          "AWS PrivateLink",
+          "NAT gateway",
+          "Internet gateway",
+          "VPC Flow Logs"
+        ],
+        "a": 0,
+        "explain": "PrivateLink creates private connections that do not traverse the public Internet."
+      }
+    ],
+    "id": "custom-aws-vpc-network-isolation-mrr2fsb2"
+  },
+  {
+    "name": "AWS Encryption: KMS, CloudHSM & ACM",
+    "note": {
+      "keyConcept": "AWS encrypts data at rest and in transit using FIPS-validated HSMs in KMS (or dedicated CloudHSM) for keys and ACM for certificate lifecycle, isolating access to keys from access to data.",
+      "points": [
+        "AWS KMS uses HSMs validated under FIPS 140-2 with physical tamper-response controls; plaintext keys cannot be used outside the HSM by anyone, including AWS employees.",
+        "KMS customer keys can only be used within the AWS region in which they were created, and every KMS request is logged to CloudTrail.",
+        "AWS CloudHSM offers a dedicated FIPS 140-2 Level 3 validated HSM accessible via PKCS#11, Java Cryptography Extensions (JCE), and Microsoft CryptoNG (CNG), and can export keys to other HSMs.",
+        "The KMS custom key store logically attaches a CloudHSM cluster to a KMS key ID, so requests are authorized by KMS but executed on the customer's dedicated CloudHSM.",
+        "Data in transit is protected at three layers: physically between data centers, at the network layer within/peered VPCs on supported EC2 types, and at the application layer via TLS; all AWS service endpoints support TLS.",
+        "AWS Certificate Manager (ACM) provides publicly trusted certificates at no cost and a private certificate authority for internal certs, automating generation, distribution, and rotation."
+      ],
+      "mnemonic": "KMS is the shared bank vault (FIPS 140-2), CloudHSM is your private vault (Level 3), the custom key store hands KMS the keys to open your vault, and ACM keeps every TLS ID card fresh."
+    },
+    "cards": [
+      {
+        "front": "Under what standard are AWS KMS HSMs validated, and what physical protection do they have?",
+        "back": "FIPS 140-2, with physical tamper-response controls; plaintext keys can't leave the HSM, even for AWS employees."
+      },
+      {
+        "front": "What FIPS level is AWS CloudHSM validated to, and which APIs does it support?",
+        "back": "FIPS 140-2 Level 3; PKCS#11, Java Cryptography Extensions (JCE), and Microsoft CryptoNG (CNG)."
+      },
+      {
+        "front": "What is the geographic constraint on KMS customer keys?",
+        "back": "They can only be used within the AWS region in which they were created."
+      },
+      {
+        "front": "What does the AWS KMS custom key store do?",
+        "back": "It logically attaches a CloudHSM cluster to a KMS key ID, so requests are authorized by KMS but executed on the customer's dedicated CloudHSM."
+      },
+      {
+        "front": "Name the three layers at which AWS protects data in transit.",
+        "back": "Physical layer (between data centers), network layer (within/peered VPCs on supported EC2 types), and application layer (TLS)."
+      },
+      {
+        "front": "What does AWS Certificate Manager (ACM) offer at no cost, and what else can it run?",
+        "back": "Publicly trusted certificates at no cost, plus a private certificate authority for internal certs, automating issuance and rotation."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "To what FIPS 140-2 level is AWS CloudHSM validated?",
+        "opts": [
+          "Level 3",
+          "Level 1",
+          "Level 2",
+          "Level 4"
+        ],
+        "a": 0,
+        "explain": "CloudHSM offers a dedicated FIPS 140-2 Level 3 validated HSM."
+      },
+      {
+        "q": "Where can a KMS customer key be used?",
+        "opts": [
+          "Only within the region in which it was created",
+          "In any region globally",
+          "Only in us-east-1",
+          "Any region within the same account"
+        ],
+        "a": 0,
+        "explain": "Customer keys can only be used within the AWS region where they were created."
+      },
+      {
+        "q": "In a KMS custom key store, where are cryptographic operations executed?",
+        "opts": [
+          "On the customer's dedicated CloudHSM",
+          "In the shared KMS HSMs",
+          "On the EC2 instance",
+          "In ACM"
+        ],
+        "a": 0,
+        "explain": "The custom key store authorizes requests via KMS but executes them on the customer's dedicated CloudHSM."
+      },
+      {
+        "q": "Which service issues publicly trusted TLS certificates at no cost and rotates them?",
+        "opts": [
+          "AWS Certificate Manager (ACM)",
+          "AWS KMS",
+          "AWS CloudHSM",
+          "Amazon CloudFront"
+        ],
+        "a": 0,
+        "explain": "ACM provides free publicly trusted certificates and automates their distribution and rotation."
+      }
+    ],
+    "id": "custom-aws-encryption-kms-cloudhsm-acm-mrr2fsb2"
+  },
+  {
+    "name": "AWS Host & Instance Isolation (Nitro System)",
+    "note": {
+      "keyConcept": "The AWS Nitro System uses purpose-built PCIe cards, a Nitro Security Chip, and a lightweight KVM hypervisor to isolate hosts and instances, with dedicated-tenancy options for physical isolation.",
+      "points": [
+        "The Nitro System is a family of PCIe cards with custom ASICs that control functions like storage access and virtual networking, plus a Nitro Security Chip.",
+        "The Nitro Security Chip continuously monitors and protects hardware and independently verifies firmware each time a system boots.",
+        "The Nitro hypervisor is a lightweight KVM-based hypervisor; operator-host interactions are constrained to a small set of API-callable functions with no interactive shell access, and instances get memory and CPU isolation.",
+        "Dedicated Instances are hypervised EC2 instances on hardware dedicated to a single customer, physically isolated from other accounts but able to share hardware with the same account's non-dedicated instances.",
+        "A Dedicated Host gives visibility and control over instance placement via Host Affinity and Instance Auto-placement, useful for meeting BYOL licensing requirements.",
+        "Bare Metal instances are non-hypervised hosts giving direct EC2 hardware access, using Nitro for network/storage offload and the Nitro Security Chip to address serial single-tenancy risk, with full VPC and EBS access."
+      ],
+      "mnemonic": "Nitro = smart cards + a boot-time firmware inspector + a featherweight KVM with no shell; then choose your tenancy: shared, Dedicated Instance, Dedicated Host, or Bare Metal."
+    },
+    "cards": [
+      {
+        "front": "What is the AWS Nitro System composed of?",
+        "back": "A family of PCIe cards with custom ASICs (controlling storage, virtual networking) plus a Nitro Security Chip, working with the Nitro hypervisor."
+      },
+      {
+        "front": "What does the Nitro Security Chip do at each system boot?",
+        "back": "It independently verifies firmware (and continuously monitors and protects hardware resources)."
+      },
+      {
+        "front": "What kind of hypervisor is the Nitro hypervisor, and what host access do operators have?",
+        "back": "A lightweight KVM-based hypervisor; operators have no interactive shell access, only a small set of API-callable functions."
+      },
+      {
+        "front": "How does a Dedicated Host differ from Dedicated Instances regarding placement?",
+        "back": "A Dedicated Host gives visibility and control over instance placement (Host Affinity, Instance Auto-placement); Dedicated Instances do not."
+      },
+      {
+        "front": "Can Dedicated Instances share hardware with anything?",
+        "back": "Only with other non-Dedicated instances from the same AWS account — never with instances from other AWS accounts."
+      },
+      {
+        "front": "What are Bare Metal instances and how do they mitigate single-tenancy risk?",
+        "back": "Non-hypervised hosts giving direct EC2 hardware access; they use Nitro for network/storage offload and the Nitro Security Chip to address serial single-tenancy risks."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "What does the Nitro Security Chip verify each time a system boots?",
+        "opts": [
+          "Firmware",
+          "TLS certificates",
+          "IAM policies",
+          "VPC route tables"
+        ],
+        "a": 0,
+        "explain": "The Nitro Security Chip independently verifies firmware on each boot."
+      },
+      {
+        "q": "What type of hypervisor underlies the AWS Nitro System?",
+        "opts": [
+          "A lightweight KVM-based hypervisor",
+          "A Xen-based hypervisor",
+          "VMware ESXi",
+          "Microsoft Hyper-V"
+        ],
+        "a": 0,
+        "explain": "The Nitro hypervisor is a lightweight KVM (kernel virtual machine)-based hypervisor."
+      },
+      {
+        "q": "Which dedicated option gives control over instance placement via Host Affinity?",
+        "opts": [
+          "Dedicated Host",
+          "Dedicated Instance",
+          "Bare Metal",
+          "Spot Instance"
+        ],
+        "a": 0,
+        "explain": "Dedicated Hosts give visibility and control over placement using Host Affinity and Instance Auto-placement."
+      },
+      {
+        "q": "Can Dedicated Instances share host hardware with other AWS accounts?",
+        "opts": [
+          "No — they are physically isolated at the host level from other accounts",
+          "Yes, always",
+          "Yes, if in the same region",
+          "Only inside a VPC"
+        ],
+        "a": 0,
+        "explain": "Dedicated Instances are physically isolated at the host hardware level from other AWS accounts."
+      }
+    ],
+    "id": "custom-aws-host-instance-isolation-nitro-system-mrr2fsb2"
+  },
+  {
+    "name": "AWS Serverless & Container Isolation (Firecracker)",
+    "note": {
+      "keyConcept": "AWS isolates serverless functions and containers in layers built on Nitro bare metal and the open-source Firecracker micro-VM monitor, giving Lambda and Fargate strong per-account sandboxing.",
+      "points": [
+        "Firecracker is a purpose-built lightweight virtual machine monitor (VMM) created by AWS to securely manage containers and serverless functions; its source code is open source.",
+        "AWS Lambda runs in EC2 as micro-VMs, and each function executes in a sandbox contained within the micro-VM.",
+        "The sandbox provides secure Linux kernel isolation using cgroups, namespaces, seccomp, plus process jailing and static linking.",
+        "The isolation layers start with the same Nitro-based bare metal instances any customer can provision, then add the Firecracker micro-VM layer.",
+        "Amazon ECS Task Definitions define isolation, and each task can receive its own elastic network interface (ENI) in the customer's VPC — the same VPC security features as EC2 — with IAM policies applied per task.",
+        "Amazon Elastic Container Registry (ECR) automatically encrypts container images at rest and in transit, with IAM policies controlling access to images."
+      ],
+      "mnemonic": "Bare metal (Nitro) at the bottom, Firecracker micro-VMs in the middle, and a cgroups/namespaces/seccomp sandbox on top — a nesting doll of isolation for every Lambda invocation."
+    },
+    "cards": [
+      {
+        "front": "What is Firecracker, who built it, and what does it isolate?",
+        "back": "A purpose-built lightweight virtual machine monitor (VMM), built by AWS and open-sourced, that securely isolates serverless functions and containers as micro-VMs."
+      },
+      {
+        "front": "What Linux kernel isolation techniques does the Lambda micro-VM sandbox use?",
+        "back": "cgroups, namespaces, and seccomp, plus process jailing and static linking."
+      },
+      {
+        "front": "How does an ECS task get VPC-level network security equivalent to an EC2 instance?",
+        "back": "Each ECS Task Definition can receive its own elastic network interface (ENI) in the customer's VPC."
+      },
+      {
+        "front": "What does Amazon ECR do automatically to container images?",
+        "back": "It automatically encrypts container images at rest and in transit, with IAM policies controlling access."
+      },
+      {
+        "front": "On what foundation do the Lambda/Fargate isolation layers start?",
+        "back": "Nitro-based bare metal instances (the same ones customers can provision), with the Firecracker micro-VM layer built on top."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "What is Firecracker?",
+        "opts": [
+          "A lightweight virtual machine monitor for micro-VMs",
+          "A container registry",
+          "A load balancer",
+          "A threat-detection service"
+        ],
+        "a": 0,
+        "explain": "Firecracker is a purpose-built lightweight VMM created by AWS to isolate serverless functions and containers."
+      },
+      {
+        "q": "Which Linux isolation features does the Lambda sandbox use?",
+        "opts": [
+          "cgroups, namespaces, and seccomp",
+          "TLS, IPsec, and NAT",
+          "RBAC, ABAC, and MFA",
+          "JCE, CNG, and PKCS#11"
+        ],
+        "a": 0,
+        "explain": "The Lambda micro-VM sandbox uses cgroups, namespaces, and seccomp for kernel isolation."
+      },
+      {
+        "q": "How does an ECS task obtain its own VPC network identity?",
+        "opts": [
+          "It receives its own elastic network interface (ENI)",
+          "Through a NAT gateway",
+          "Through a Transit Gateway",
+          "Through an internet gateway"
+        ],
+        "a": 0,
+        "explain": "Each ECS Task Definition can get its own ENI in the customer VPC, giving EC2-equivalent network security."
+      },
+      {
+        "q": "What does Amazon ECR do to container images automatically?",
+        "opts": [
+          "Encrypts them at rest and in transit",
+          "Compresses them",
+          "Signs them with ACM",
+          "Mirrors their traffic"
+        ],
+        "a": 0,
+        "explain": "Amazon ECR automatically encrypts container images both at rest and in transit."
+      }
+    ],
+    "id": "custom-aws-serverless-container-isolation-firec-mrr2fsb2"
+  },
+  {
+    "name": "AWS Data Obfuscation & Compliance Separation (FedRAMP/DoD)",
+    "note": {
+      "keyConcept": "AWS has no visibility into customer content and offers techniques (encryption, tokenization, decomposition, deception) to render data unintelligible, satisfying compliance regimes like FedRAMP and the DoD SRG.",
+      "points": [
+        "AWS has no visibility into or knowledge of content inside a customer account, and AWS personnel cannot log into customer EC2 instances or ECS/EKS containers — customers hold full root/administrative control.",
+        "AWS lists four techniques to render content unintelligible: encryption, tokenization, data decomposition, and cyber deception.",
+        "Tokenization replaces sensitive data with a meaningless token that cannot be mapped back without the tokenization system; token vaults can live in VPCs.",
+        "Data decomposition fragments data into meaningless distributed pieces, so an attacker must access all nodes, obtain all fragments, and know the fragmentation algorithm to reconstruct it.",
+        "FedRAMP (established Dec 2011 by the U.S. Federal CIO) maintains three security baselines — Low, Moderate, and High — based on FIPS 199 categorizations; DoD established reciprocity with Moderate but NOT High, using its 'FedRAMP plus' Cloud Computing SRG instead.",
+        "DoD Impact Level 5 (IL5) requires physical separation (e.g., dedicated infrastructure) from non-DoD/non-Federal tenants; AWS demonstrated logical separation combined with dedicated tenancy meets IL5's intent."
+      ],
+      "mnemonic": "AWS is blind to your data; you cloak it four ways (encrypt, tokenize, decompose, deceive) — enough that even DoD IL5's 'physical separation' rule was met by logical separation plus dedicated tenancy."
+    },
+    "cards": [
+      {
+        "front": "Can AWS personnel log into customer EC2 instances or ECS/EKS containers?",
+        "back": "No — customers have full root/administrative control; AWS personnel cannot log into them, and AWS has no visibility into account content."
+      },
+      {
+        "front": "What four data-obfuscation techniques does AWS list to render content unintelligible?",
+        "back": "Encryption, tokenization, data decomposition, and cyber deception."
+      },
+      {
+        "front": "What are FedRAMP's three security baselines, and what standard categorizes them?",
+        "back": "Low, Moderate, and High — based on FIPS 199 categorizations."
+      },
+      {
+        "front": "Which FedRAMP baseline did DoD establish reciprocity with, and which did it not?",
+        "back": "Reciprocity with Moderate; NOT with High — DoD instead uses its 'FedRAMP plus' Cloud Computing Security Requirements Guide (SRG)."
+      },
+      {
+        "front": "What separation does DoD Impact Level 5 (IL5) require?",
+        "back": "Physical separation (e.g., dedicated infrastructure) from non-DoD/non-Federal Government tenants."
+      },
+      {
+        "front": "In data decomposition, what must an attacker do to reconstruct the data?",
+        "back": "Access all nodes, obtain all fragments, and know the fragmentation algorithm (scheme)."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "What standard underlies FedRAMP's Low/Moderate/High baselines?",
+        "opts": [
+          "FIPS 199",
+          "FIPS 140-2",
+          "PKCS#11",
+          "ISO 27001"
+        ],
+        "a": 0,
+        "explain": "FedRAMP's three baselines are based on FIPS 199 categorizations."
+      },
+      {
+        "q": "Which FedRAMP baseline did the DoD NOT establish reciprocity with?",
+        "opts": [
+          "High",
+          "Low",
+          "Moderate",
+          "None of them"
+        ],
+        "a": 0,
+        "explain": "DoD established reciprocity with FedRAMP Moderate but not High, using its own 'FedRAMP plus' SRG."
+      },
+      {
+        "q": "What separation does DoD IL5 require from non-DoD/non-Federal tenants?",
+        "opts": [
+          "Physical separation (dedicated infrastructure)",
+          "Logical separation only",
+          "TLS encryption only",
+          "Tokenization only"
+        ],
+        "a": 0,
+        "explain": "IL5 requires physical separation, e.g., dedicated infrastructure, from non-DoD/non-Federal tenants."
+      },
+      {
+        "q": "Can AWS staff log into a customer's EC2 instances?",
+        "opts": [
+          "No, customers hold full control and AWS cannot log in",
+          "Yes, with MFA",
+          "Yes, for support cases",
+          "Only in GovCloud"
+        ],
+        "a": 0,
+        "explain": "AWS personnel cannot log into customer EC2 instances or ECS/EKS containers."
+      }
+    ],
+    "id": "custom-aws-data-obfuscation-compliance-separati-mrr2fsb2"
   }
 ]/* END-TOPICS */;
