@@ -1,11 +1,13 @@
 ---
 name: cards-from-docs
-description: Turn a batch of documents, local files, URLs, or Notion pages into TideLearn study topics (note + flashcards + quiz) in learn/custom-topics.js, one at a time, without loading full source text into the main conversation. Use when the user wants to build study cards from notes — from Notion, Obsidian, plain files, or web docs — for the /learn app, especially across several sources in one session.
+description: Turn a batch of documents, local files (markdown, text, HTML, PDF), URLs, or Notion pages into TideLearn study topics (note + flashcards + quiz) in learn/custom-topics.js, one at a time, without loading full source text into the main conversation. Use when the user wants to build study cards from notes — from Notion, Obsidian, plain files, PDFs, or web docs — for the /learn app, especially across several sources or anything long enough to matter for context size.
 ---
 
 # cards-from-docs
 
 Orchestrates a batch of sources against the `card-builder` subagent so that the full text of any document only ever lives inside that subagent's own context — this conversation holds nothing bigger than a compact summary and the final JSON that lands in `learn/custom-topics.js`.
+
+**Don't `Read`/`WebFetch` a source directly in the main conversation "just to check it" before dispatching** — that defeats the entire point. If a source is worth running through this skill at all, its full text belongs in the subagent's context only, never here.
 
 ## Protocol
 
@@ -28,4 +30,6 @@ The deployed `/learn` Import screen (paste text or a URL) hits `netlify/function
 
 ## When not to use this
 
-For a single, small, single-topic source where you're confident no judgment/splitting is needed, it's simpler to just run `node tools/import-doc.mjs <url-or-file>` directly (or `--dry-run` first to preview extraction) — no need to spin up a subagent for that.
+For a single, small, single-topic source where you're confident no judgment/splitting is needed — including a short PDF — it's simpler to just run `node tools/import-doc.mjs <url-or-file>` directly (or `--dry-run` first to preview extraction) — no need to spin up a subagent for that, and it costs zero conversation context either way since the script runs standalone.
+
+For a **long** source (a multi-page PDF, a long article, anything you're not confident fits in one clean topic), always route it through the `card-builder` subagent instead — `--dry-run`'s extraction preview is capped at 8000 characters and will silently truncate anything longer, which is exactly the failure mode this skill exists to avoid.
