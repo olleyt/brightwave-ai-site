@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-/* Local-only importer: turns a URL or a local file (markdown/text/html) into a
-   TideLearn topic (note + flashcards + quiz) with Claude, and appends it to
+/* Local-only importer: turns a URL or a local file (markdown/text/html/pdf) into
+   a TideLearn topic (note + flashcards + quiz) with Claude, and appends it to
    learn/custom-topics.js. The API key never leaves this machine — the deployed
    site stays fully static.
 
@@ -22,6 +22,7 @@ import { fileURLToPath } from "node:url";
 import {
   extractFromHtml,
   extractFromText,
+  extractFromPdf,
   generateTopic,
   slugId,
   buildTopic,
@@ -115,8 +116,16 @@ async function readSource(input, titleArg) {
     console.error(`File not found: ${input}`);
     process.exit(1);
   }
-  const raw = fs.readFileSync(input, "utf8");
   const ext = path.extname(input).toLowerCase();
+  if (ext === ".pdf") {
+    try {
+      return await extractFromPdf(fs.readFileSync(input), titleArg);
+    } catch (e) {
+      console.error(`Couldn't read that PDF: ${e.message}`);
+      process.exit(1);
+    }
+  }
+  const raw = fs.readFileSync(input, "utf8");
   return ext === ".html" || ext === ".htm" ? extractFromHtml(raw, titleArg) : extractFromText(raw, titleArg);
 }
 

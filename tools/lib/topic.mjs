@@ -67,6 +67,32 @@ export function extractFromText(raw, titleOverride) {
   return { title, text: text.slice(0, MAX_CHARS) };
 }
 
+/* For local PDF files. Only pulls text out of the content layer — a scanned/
+   image-only PDF will come back empty and fail the isTooShort check upstream. */
+export async function extractFromPdf(buffer, titleOverride) {
+  const { PDFParse } = await import("pdf-parse");
+  const parser = new PDFParse({ data: buffer });
+  try {
+    const { text: raw } = await parser.getText();
+    const text = (raw || "").replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+
+    let title = titleOverride;
+    if (!title) {
+      try {
+        const info = await parser.getInfo();
+        title = info?.info?.Title?.trim();
+      } catch {
+        // metadata isn't always present — fall through to text-derived title
+      }
+    }
+    title = title || text.split("\n").find((l) => l.trim())?.trim() || "Imported topic";
+
+    return { title, text: text.slice(0, MAX_CHARS) };
+  } finally {
+    await parser.destroy();
+  }
+}
+
 /* ---------- topic generation ---------- */
 
 export const TOPIC_SCHEMA = {
