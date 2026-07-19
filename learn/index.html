@@ -77,7 +77,7 @@
     <div class="dash-head">
       <p class="eyebrow">Bring your own material</p>
       <h1 class="dash-title">Import a lesson</h1>
-      <p class="lede">Paste text from any source — an Educative.io lesson, an article, your own notes. TideLearn turns it into a study note and flashcards, and folds it into your schedule.</p>
+      <p class="lede">Paste text from any source — an Educative.io lesson, an article, your own notes — or give a URL. TideLearn turns it into a study note and flashcards, and folds it into your schedule.</p>
     </div>
     <div class="import-grid">
       <div class="import-form">
@@ -85,8 +85,11 @@
         <input class="field" id="importTitle" type="text" placeholder="e.g. Kubernetes Networking Basics">
         <label class="field-label" for="importText">Lesson text</label>
         <textarea class="field field-area" id="importText" placeholder="Paste the lesson content here…"></textarea>
+        <label class="field-label" for="importUrl">…or a URL (leave the fields above empty)</label>
+        <input class="field" id="importUrl" type="url" placeholder="https://…">
         <button class="btn btn-primary" id="importBtn">Generate note &amp; cards</button>
         <p class="import-note" id="importStatus"></p>
+        <button class="btn btn-secondary" id="importCopyBtn" hidden>Copy topic JSON</button>
       </div>
       <aside class="import-aside">
         <h3>Getting text out of Educative.io</h3>

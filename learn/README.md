@@ -1,6 +1,6 @@
 # TideLearn — adaptive exam-prep demo (BrightWave AI)
 
-One daily session: **Recall → Read → Learn → Check → Results**. Spaced repetition (SM-2, Anki-style 4-button grading with interval previews), review-mode speed reading (RSVP with ORP focus, chunking, sentence replay), comprehension quiz that gates topic pacing, tune-mode mnemonic chants, and a paste-based lesson importer.
+One daily session: **Recall → Read → Learn → Check → Results**. Spaced repetition (SM-2, Anki-style 4-button grading with interval previews), review-mode speed reading (RSVP with ORP focus, chunking, sentence replay), comprehension quiz that gates topic pacing, tune-mode mnemonic chants, and a lesson importer available both as a GUI screen and a CLI/subagent pipeline.
 
 ## Run locally
 Any static server from this folder:
@@ -13,12 +13,24 @@ python3 -m http.server 8080     # then open http://localhost:8080
 ## Deploy to your Netlify site
 Copy `index.html`, `styles.css`, `data.js`, `app.js` into a `/learn/` folder in `brightwave-ai-site`, then link it, e.g. from the services grid: `<a href="/learn/">Try our adaptive learning demo →</a>`.
 
+To get real Claude-generated cards (not the heuristic fallback) out of the Import screen, set an `ANTHROPIC_API_KEY` environment variable on the Netlify site (Site configuration → Environment variables) — `netlify/functions/generate-topic.mjs` reads it server-side; the key never reaches the browser. Without it configured, the Import screen still works via the heuristic generator.
+
+## Building cards from documents (CLI, subagent, skill)
+Beyond the in-app paste-a-lesson screen, there's a repeatable pipeline for turning documents into permanent, site-wide topics in `learn/custom-topics.js`:
+
+- **`node tools/import-doc.mjs <url-or-file> [--title "..."] [--dry-run]`** — the mechanical single-topic path. Accepts a `http(s)://` URL or a local file (`.html`/`.htm`, or `.md`/`.txt` for Notion/Obsidian exports and plain notes). `--dry-run` previews the extracted title/text without calling Claude or writing anything.
+- **`node tools/import-doc.mjs --apply <topics.json>`** — takes one topic object or a JSON array of them (already fully drafted, e.g. by a subagent that read the whole source itself) and mechanically validates, assigns collision-safe ids, appends into `learn/custom-topics.js`, and bumps the cache version. No Claude call in this mode.
+- **`card-builder` subagent** (`.claude/agents/card-builder.md`) — reads a single source in full (local file, URL, or a Notion page via the Notion MCP tools) itself, exercises judgment on topic boundaries and card quality, then calls `--apply` to commit. Returns only a compact summary (names, counts, a couple of sample cards) — never the full source or full card list.
+- **`cards-from-docs` skill** (`.claude/skills/cards-from-docs/SKILL.md`) — orchestrates a batch of sources against the `card-builder` subagent, one dispatch per source, so a whole batch's source text never has to live in the main conversation. Run `/cards-from-docs`.
+
+Shared logic (schema, extraction, id generation, validation) lives in `tools/lib/topic.mjs` and is used by both the CLI and `netlify/functions/generate-topic.mjs` (the GUI's backend), so the two paths stay in sync.
+
 ## Architecture decisions (deliberate)
-- **No backend.** State lives in a safe storage adapter (localStorage with in-memory fallback). Validates the learning loop before any AWS spend.
+- **No backend for state.** Topic/card/schedule state lives in a safe storage adapter (localStorage with in-memory fallback). Validates the learning loop before any AWS spend. The one server-side piece, `netlify/functions/generate-topic.mjs`, exists only to keep the Anthropic API key off the client — it returns topic JSON, it doesn't persist anything.
 - **Scheduler is swappable.** `Scheduler.schedule()` is pure; replace with FSRS later without touching UI.
 - **RSVP is a review mode, not a first-exposure mode** — comprehension drops at high WPM and RSVP removes regressions, so it's applied to notes you're revising, with a Full-text toggle, 1–3 word chunking, and `R` sentence replay.
 - **Quiz updates topic mastery (pacing); card grades update scheduling.** Recognition and recall signals are kept separate on purpose.
-- **Importer** tries the Claude API (works when hosted inside a claude.ai artifact) and falls back to a heuristic generator everywhere else — same output shape.
+- **Importer (GUI)** calls `netlify/functions/generate-topic.mjs` and falls back to a heuristic generator when that's unreachable (e.g. a plain static server locally, or the env var isn't set yet) — same output shape either way. GUI imports save to the visiting browser's local storage only; use the CLI/subagent/skill above (or the Import screen's "Copy topic JSON" + `--apply`) to make a topic permanent and visible to every visitor.
 
 ## Tests (run with node)
 ```bash
@@ -43,6 +55,6 @@ Ask Claude Code to verify visually what jsdom can't:
 12. **Reduced motion** — with `prefers-reduced-motion`, no flip/rise animations.
 
 ## Known limits / next iterations
-- Quiz questions aren't generated for imported topics (heuristic path) — Claude path does generate; wire your API key or run inside claude.ai.
+- Quiz questions aren't generated for imported topics on the heuristic path (no `ANTHROPIC_API_KEY` configured, or the function is unreachable) — set the env var on Netlify (see Deploy section above) to get the real Claude path, which does generate a quiz.
 - Tune mode has 2 hand-written chants; production path = Claude writes lyrics from the note + Web Audio beat (already scaffolded).
 - FSRS upgrade, exam-date setting UI, and per-topic analytics are the obvious next three.

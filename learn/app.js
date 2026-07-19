@@ -793,56 +793,89 @@ function stopTune() {
 }
 
 /* ============================================================
-   IMPORT — paste a lesson, get a topic
-   Tries Claude API (works when hosted inside claude.ai artifacts),
-   falls back to a heuristic generator everywhere else.
+   IMPORT — paste a lesson (or give a URL), get a topic
+   Tries the site's generate-topic Netlify Function (server-side Claude
+   call, full quiz generation), falls back to a heuristic generator when
+   that's unreachable — e.g. running from a plain static server locally,
+   or before ANTHROPIC_API_KEY is configured on the deployed site.
    ============================================================ */
+let lastImportedTopic = null;
+
 $("#importBtn").addEventListener("click", async () => {
   const title = $("#importTitle").value.trim();
   const text = $("#importText").value.trim();
+  const urlField = $("#importUrl");
+  const url = urlField ? urlField.value.trim() : "";
   const status = $("#importStatus");
-  if (!title || text.split(/\s+/).length < 40) {
+
+  const hasUrl = !!url;
+  const hasText = !!title && text.split(/\s+/).length >= 40;
+
+  if (hasUrl && !/^https?:\/\//.test(url)) {
     status.style.color = "#C87F1E";
-    status.textContent = "Add a title and at least a few paragraphs of lesson text.";
+    status.textContent = "That doesn't look like a valid http(s) URL.";
     return;
   }
+  if (!hasUrl && !hasText) {
+    status.style.color = "#C87F1E";
+    status.textContent = "Add a title and at least a few paragraphs of lesson text, or a URL.";
+    return;
+  }
+
   status.style.color = "";
   status.textContent = "Generating note and cards…";
   let topic = null;
-  try { topic = await generateWithClaude(title, text); } catch (e) { /* fall through */ }
-  if (!topic) topic = generateHeuristic(title, text);
+  try { topic = await generateWithClaude({ title, text, url: hasUrl ? url : "" }); } catch (e) { /* fall through */ }
+  if (!topic) {
+    if (!hasText) {
+      status.style.color = "#C87F1E";
+      status.textContent = "Couldn't reach the card generator for that URL. Paste the lesson text instead, or try again once the site's deployed.";
+      return;
+    }
+    topic = generateHeuristic(title, text);
+  }
 
   state.customTopics.push(topic);
   migrateImportedTopics();
   persist();
+  lastImportedTopic = topic;
   status.textContent = `Added "${topic.name}" with ${topic.cards.length} cards. It'll appear in your next session's Read phase.`;
-  $("#importTitle").value = ""; $("#importText").value = "";
+  $("#importTitle").value = ""; $("#importText").value = ""; if (urlField) urlField.value = "";
+  const copyBtn = $("#importCopyBtn");
+  if (copyBtn) copyBtn.hidden = false;
 });
 
-async function generateWithClaude(title, text) {
+$("#importCopyBtn")?.addEventListener("click", async () => {
+  if (!lastImportedTopic) return;
+  const status = $("#importStatus");
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(lastImportedTopic, null, 2));
+    status.textContent = "Copied topic JSON — run `node tools/import-doc.mjs --apply <file>` to make it permanent and site-wide.";
+  } catch (e) {
+    status.textContent = "Couldn't copy to clipboard — your browser may be blocking it.";
+  }
+});
+
+/* Calls the generate-topic Netlify Function (see netlify/functions/generate-topic.mjs),
+   which runs the same extraction + schema-constrained Claude call as the CLI importer
+   (tools/lib/topic.mjs) server-side, so the API key never reaches the browser. */
+async function generateWithClaude({ title, text, url }) {
   const controller = new AbortController();
-  const to = setTimeout(() => controller.abort(), 12000);
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    signal: controller.signal,
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1000,
-      messages: [{
-        role: "user",
-        content: `Turn this lesson into study material. Respond ONLY with JSON, no markdown fences:
-{"keyConcept":"one sentence","points":["4-6 short factual sentences"],"mnemonic":"one vivid memory trigger","cards":[{"front":"question","back":"answer"} x4-6]}
-Title: ${title}
-Lesson: ${text.slice(0, 6000)}`
-      }]
-    })
-  });
-  clearTimeout(to);
-  const data = await resp.json();
-  const raw = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n");
-  const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
-  return buildTopic(title, parsed.keyConcept, parsed.points, parsed.mnemonic, parsed.cards);
+  const to = setTimeout(() => controller.abort(), 25000);
+  try {
+    const resp = await fetch("/.netlify/functions/generate-topic", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify(url ? { url } : { title, text }),
+    });
+    if (!resp.ok) return null;
+    const topic = await resp.json();
+    if (!topic || !topic.id || !Array.isArray(topic.cards)) return null;
+    return topic;
+  } finally {
+    clearTimeout(to);
+  }
 }
 
 function generateHeuristic(title, text) {
